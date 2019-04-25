@@ -36,6 +36,63 @@ At each vertex of the graph, there are symbols that will be dialed without a thu
 
 For example, the letter A is pressed with the index finger, the letter O with the index and thumb, the letter S with the index and middle finger, and Z with all but the middle finger.
 
+## Chords
+
+Letters
+~~~
+Eng	Rus	Chord1	Chord2
+A	А	1	6
+B	Б	024	579
+C	К	34	89
+D	Д	13	68
+E	Е	3	8
+F	Ё	234	789
+G	Г	0234	5789
+H	В	123	678
+I	И	03	58
+J	Й	014	569
+K	Ч	124	679
+L	Л	012	567
+M	М	034	589
+N	Н	02	57
+O	О	01	56
+P	П	013	568
+Q	Ж	0124	5679
+R	Р	023	578
+S	С	12	67
+T	Т	23	78
+U	У	0123	5678
+V	Ь	24	79
+W	Я	14	69
+X	Х	124	679
+Y	Ы	1234	6789
+Z	З	0134	5689
+	Щ	051
+	Ю	052
+	Ш	053
+	Э	054
+	Ф	0513
+	Ц	0514
+	Ъ	05134
+~~~
+
+Numbers
+~~~
+Num	Chord1	Chord2
+1	90	45
+2	91	46
+3	901	456
+4	92	47
+5	902	457
+6	912	467
+7	9012	4567
+8	93	48
+9	903	458
+0	913	468
+~~~
+
+It is very difficult to remember chords on the tables; it is better to memorize the location of the vertex in the graph.
+
 ## Kladenets-3
 
 To print with one hand at once, 3 letters at once, it is proposed to create a keyboard with 4 rows of buttons, but slightly compacted, so that you can press the extreme buttons simultaneously on different fingers. In this case, it will be necessary to press only the buttons individually or side by side, which gives as many combinations as the total of 3 buttons, that is, 8, including the state when nothing is pressed.
