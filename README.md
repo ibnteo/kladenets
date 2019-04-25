@@ -30,7 +30,7 @@ For easy memorization of chords, they are written in the form of a graph, where 
 
 For convenience, created graphs for the left and right hands, for the upper and lower rows.
 
-![](layout/graph.svg)
+![](layout/graph.png)
 
 At each vertex of the graph, there are symbols that will be dialed without a thumb, and with the button pressed on the thumb.
 
