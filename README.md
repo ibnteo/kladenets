@@ -22,7 +22,7 @@ With a quadruple chord, the order of the letters goes from top to bottom, from l
 
 You can print as a single chord, or in turn, the analysis of the time you press chords allows you to reliably distinguish the style of work.
 
-Accord is triggered as soon as at least one button is released, and until a new button is pressed, the release of the following buttons will not work. This will allow a sequence of similar chords to press fewer fingers while holding certain buttons.
+A chord is triggered as soon as a single button is released, and until a new button is pressed, releasing the following buttons will not work. This will allow a sequence of similar chords to press fewer fingers while holding certain buttons.
 
 ## Keyboard layout
 
