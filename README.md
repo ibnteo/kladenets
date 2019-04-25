@@ -58,3 +58,7 @@ It can be executed as an auxiliary one-handed keyboard, with duplication of butt
 ## Kladenets-M
 
 To print texts from a musical keyboard, it is proposed to make a program or a hardware adapter from a MIDI keyboard or synthesizer that switches the musical keyboard to a computer keyboard by pressing 10 keys simultaneously, after which these 10 keys will allow you to print 2 chords with two hands. The left hand will be responsible for the top row of the ordinary Kladenets (-2), the right hand for the bottom row.
+
+## License
+
+[License MIT](LICENSE.txt)
