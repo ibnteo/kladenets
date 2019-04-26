@@ -124,4 +124,4 @@ To print texts from a musical keyboard, it is proposed to make a program or a ha
 
 ---
 
-**Eng** | [Rus](ru/)
+**Eng** | [Rus](https://ibnteo.github.io/kladenets/ru/)

@@ -124,4 +124,4 @@
 
 ---
 
-[Eng](../) | **Rus**
+[Eng](https://ibnteo.github.io/kladenets/) | **Rus**
