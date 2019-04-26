@@ -1,3 +1,5 @@
+[Eng](#) [Rus](ru/)
+
 # Chord keyboard Kladenets
 
 Kladenets-2 is a chord keyboard for printing up to 4 letters in one chord with both hands. Theoretically, it will speed up printing by 2 times compared to standard keyboards.
