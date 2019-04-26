@@ -95,6 +95,10 @@ Num	Chord1	Chord2
 
 It is very difficult to remember chords on the tables; it is better to memorize the location of the vertex in the graph.
 
+## Schema
+
+![](schema/schema.png)
+
 ## Kladenets-3
 
 To print with one hand at once, 3 letters at once, it is proposed to create a keyboard with 4 rows of buttons, but slightly compacted, so that you can press the extreme buttons simultaneously on different fingers. In this case, it will be necessary to press only the buttons individually or side by side, which gives as many combinations as the total of 3 buttons, that is, 8, including the state when nothing is pressed.
