@@ -43,7 +43,7 @@ For example, the letter A is pressed with the index finger, the letter O with th
 Letters
 ~~~
 Eng	Rus	Chord1	Chord2
-A	А	1	6
+A	А	01	56
 B	Б	024	579
 C	К	34	89
 D	Д	13	68
@@ -57,7 +57,7 @@ K	Ч	124	679
 L	Л	012	567
 M	М	034	589
 N	Н	02	57
-O	О	01	56
+O	О	1	6
 P	П	013	568
 Q	Ж	0124	5679
 R	Р	023	578
