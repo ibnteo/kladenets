@@ -38,7 +38,7 @@ For example, the letter A is pressed with the index finger, the letter O with th
 
 ## Chords
 
-![](../layout/chords.png)
+![](layout/chords.png)
 
 Letters
 ~~~
