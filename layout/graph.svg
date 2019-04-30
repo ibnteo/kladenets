@@ -16,7 +16,10 @@
    id="svg12300"
    version="1.1"
    inkscape:version="0.91 r13725"
-   sodipodi:docname="graph.svg">
+   sodipodi:docname="graph.svg"
+   inkscape:export-filename="/media/ibnteo/data/sites/kladenets/layout/graph.png"
+   inkscape:export-xdpi="100.89"
+   inkscape:export-ydpi="100.89">
   <defs
      id="defs12302">
     <pattern
@@ -187,9 +190,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1.979899"
-     inkscape:cx="329.05604"
-     inkscape:cy="624.66082"
+     inkscape:zoom="1.4"
+     inkscape:cx="437.73765"
+     inkscape:cy="589.87182"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -7274,12 +7277,12 @@
          x="69.165054"
          sodipodi:role="line"
          id="tspan5454-6-0-0"
-         style="font-size:6.25px">End</tspan><tspan
+         style="font-size:6.25px">Home</tspan><tspan
          y="149.35172"
          x="69.165054"
          sodipodi:role="line"
          id="tspan5532-0-7-9"
-         style="font-size:6.25px">Pause</tspan></text>
+         style="font-size:6.25px">PrtScr</tspan></text>
     <text
        inkscape:export-ydpi="52.720001"
        inkscape:export-xdpi="52.720001"
@@ -7312,12 +7315,12 @@
          style="font-size:6.25px"
          y="141.44308"
          x="139.86792"
-         sodipodi:role="line">Home</tspan><tspan
+         sodipodi:role="line">End</tspan><tspan
          style="font-size:6.25px"
          y="149.25558"
          x="139.86792"
          sodipodi:role="line"
-         id="tspan5524-2-9-4">PrtScr</tspan></text>
+         id="tspan5524-2-9-4">Pause</tspan></text>
     <text
        inkscape:export-ydpi="52.720001"
        inkscape:export-xdpi="52.720001"
@@ -7331,7 +7334,7 @@
          x="157.60335"
          sodipodi:role="line"
          id="tspan5424-4-4-4"
-         style="font-size:6.25px">Left</tspan><tspan
+         style="font-size:6.25px">Right</tspan><tspan
          y="186.00703"
          x="157.60335"
          sodipodi:role="line"
@@ -7351,7 +7354,7 @@
          x="122.3228"
          y="174.98071"
          id="tspan5430-6-6-0"
-         style="font-size:6.25px">Up</tspan><tspan
+         style="font-size:6.25px">Down</tspan><tspan
          sodipodi:role="line"
          x="122.3228"
          y="186.53102"
@@ -7371,7 +7374,7 @@
          y="175.05151"
          x="86.983932"
          sodipodi:role="line"
-         style="font-size:6.25px">Down</tspan><tspan
+         style="font-size:6.25px">Up</tspan><tspan
          y="186.60182"
          x="86.983932"
          sodipodi:role="line"
@@ -7392,7 +7395,7 @@
          sodipodi:role="line"
          id="tspan5416-0-6-5"
          x="51.35854"
-         y="175.07684">Right</tspan><tspan
+         y="175.07684">Left</tspan><tspan
          style="font-size:6.25px"
          sodipodi:role="line"
          x="51.35854"
@@ -8115,7 +8118,7 @@
          id="tspan13777"
          sodipodi:role="line"
          x="261.60529"
-         y="141.53922">End</tspan><tspan
+         y="141.53922">Home</tspan><tspan
          style="font-size:6.25px"
          id="tspan13779"
          sodipodi:role="line"
@@ -8153,7 +8156,7 @@
          x="332.30817"
          y="141.44308"
          style="font-size:6.25px"
-         id="tspan13789">Home</tspan><tspan
+         id="tspan13789">End</tspan><tspan
          id="tspan13791"
          sodipodi:role="line"
          x="332.30817"
@@ -9295,12 +9298,12 @@
          sodipodi:role="line"
          id="tspan5764"
          x="590.04401"
-         y="150.29527">Right</tspan><tspan
+         y="150.29527">Left</tspan><tspan
          style="font-size:6.25px"
          sodipodi:role="line"
          x="590.04401"
          y="158.10777"
-         id="tspan5766">ScrollR</tspan></text>
+         id="tspan5766">ScrollL</tspan></text>
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:10px;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
@@ -9314,14 +9317,14 @@
          sodipodi:role="line"
          x="625.56842"
          y="150.19914"
-         id="tspan14015-1">Down</tspan><tspan
+         id="tspan14015-1">Up</tspan><tspan
          id="tspan14017-8"
          style="font-size:10px"
          sodipodi:role="line"
          x="625.56842"
          y="158.01164"><tspan
            id="tspan5738-7"
-           style="font-size:6.25px">ScrollD</tspan></tspan></text>
+           style="font-size:6.25px">ScrollU</tspan></tspan></text>
     <text
        sodipodi:linespacing="125%"
        id="text14005-9"
@@ -9335,13 +9338,13 @@
          id="tspan14007-2"
          y="150.19914"
          x="661.09161"
-         sodipodi:role="line">Up</tspan><tspan
+         sodipodi:role="line">Down</tspan><tspan
          id="tspan14009-0"
          y="158.01164"
          x="661.09161"
          sodipodi:role="line"><tspan
            id="tspan5734-2"
-           style="font-size:6.25px">ScrollU</tspan></tspan></text>
+           style="font-size:6.25px">ScrollD</tspan></tspan></text>
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:10px;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
@@ -9355,12 +9358,12 @@
          id="tspan13999-7"
          sodipodi:role="line"
          x="696.26691"
-         y="150.29527">Left</tspan><tspan
+         y="150.29527">Right</tspan><tspan
          id="tspan14001-5"
          sodipodi:role="line"
          x="696.26691"
          y="158.10777"
-         style="font-size:6.25px">ScrollL</tspan></text>
+         style="font-size:6.25px">ScrollR</tspan></text>
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:10px;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
