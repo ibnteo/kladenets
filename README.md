@@ -99,6 +99,19 @@ It is very difficult to remember chords on the tables; it is better to memorize 
 
 ![](schema/schema.png)
 
+## The case of wooden slats 5x10 mm
+
+![](spline/spline.png)
+
+[SVG](spline/spline.svg)
+
+## 1.5 mm aluminum plate body
+
+![](aluminium/kladenets.png)
+
+[SVG1](aluminium/kladenets1.svg)
+[SVG2](aluminium/kladenets2.svg)
+
 ## Kladenets-3
 
 To print with one hand at once, 3 letters at once, it is proposed to create a keyboard with 4 rows of buttons, but slightly compacted, so that you can press the extreme buttons simultaneously on different fingers. In this case, it will be necessary to press only the buttons individually or side by side, which gives as many combinations as the total of 3 buttons, that is, 8, including the state when nothing is pressed.
@@ -121,6 +134,10 @@ It can be executed as an auxiliary one-handed keyboard, with duplication of butt
 ## Kladenets-M
 
 To print texts from a musical keyboard, it is proposed to make a program or a hardware adapter from a MIDI keyboard or synthesizer that switches the musical keyboard to a computer keyboard by pressing 10 keys simultaneously, after which these 10 keys will allow you to print 2 chords with two hands. The left hand will be responsible for the top row of the ordinary Kladenets (-2), the right hand for the bottom row.
+
+## Kladenets-24
+
+If printing with one hand on two chords is not convenient, you can consider the option of double-row chords, for consonant letters, chords will be on two rows on the little finger, ring and middle fingers, and vowels on the index and thumb. In this case, the lower key on the little finger is activated for the layer of numbers and symbols, and the inner key on the thumb for the navigation layer, while the hand is shifted to the outside. For consonant letters, 5 keys are used, which gives 31 chords, and for vowels 4 keys - 15 chords. In the navigation layer, there are 6 keys - 63 chords, and in the layer of numbers and symbols, 9 keys - 511 chords.
 
 ## License
 
