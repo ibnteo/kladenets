@@ -380,7 +380,7 @@ uint8_t Layers[5][31] = {
 	{ // Nav
 		HID_KEYBOARD_SC_ESCAPE,								// 0000 1
 		HID_KEYBOARD_SC_RIGHT_ARROW,						// 0001 0
-		HID_KEYBOARD_SC_Q,									// 0001 1
+		HID_KEYBOARD_SC_O,									// 0001 1
 		HID_KEYBOARD_SC_UP_ARROW,							// 0010 0
 		HID_KEYBOARD_SC_DOT_AND_GREATER_THAN_SIGN,	// 0010 1
 		HID_KEYBOARD_SC_END,									// 0011 0
@@ -404,7 +404,7 @@ uint8_t Layers[5][31] = {
 		HID_KEYBOARD_SC_HOME,								// 1100 0
 		HID_KEYBOARD_SC_PRINT_SCREEN,						// 1100 1
 		HID_KEYBOARD_SC_SPACE,								// 1101 0
-		HID_KEYBOARD_SC_0_AND_CLOSING_PARENTHESIS,	// 1101 1
+		HID_KEYBOARD_SC_CLOSING_BRACKET_AND_CLOSING_BRACE,	// 1101 1
 		HID_KEYBOARD_SC_LEFT_ALT,							// 1110 0
 		HID_KEYBOARD_SC_RIGHT_ALT,							// 1110 1
 		HID_KEYBOARD_SC_LEFT_SHIFT,						// 1111 0
@@ -468,7 +468,7 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 	
 		uint8_t usedKeyCodes = 0;
 
-		LED_Switch(Mods0 | Mods1);
+		//LED_Switch(Mods0 | Mods1);
 
 		Keyboard_Scan();
 		bool setShift = false;
@@ -508,7 +508,7 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 						} else {
 							KeyboardReport->KeyCode[usedKeyCodes++] = Layers[layer][15];
 						}
-					} else if (chords[s1] == CHORD_NUM) {
+					} else if (chords[s1] == CHORD_NUM && (chords[s2] != CHORD_NAV || Chord_UpFirst[side])) {
 						layer = LAYER_NUM2;
 						if (chords[s2]) {
 							uint8_t keyCode = Layers[layer][chords[s2]-1];
@@ -532,6 +532,10 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 									keyCode = HID_KEYBOARD_SC_UP_ARROW;
 								} else if (keyCode == HID_KEYBOARD_SC_UP_ARROW && s1) {
 									keyCode = HID_KEYBOARD_SC_DOWN_ARROW;
+								} else if (keyCode == HID_KEYBOARD_SC_HOME && s1) {
+									keyCode = HID_KEYBOARD_SC_END;
+								} else if (keyCode == HID_KEYBOARD_SC_END && s1) {
+									keyCode = HID_KEYBOARD_SC_HOME;
 								}
 								KeyboardReport->KeyCode[usedKeyCodes++] = keyCode;
 							}
@@ -556,6 +560,9 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 							//LED_On();
 						}
 					} else {
+						if ((Mods0 | Mods1) & ~(HID_KEYBOARD_MODIFIER_LEFTSHIFT | HID_KEYBOARD_MODIFIER_RIGHTSHIFT)) {
+							layer = LAYER1;
+						}
 						if (chords[s1]) {
 							uint8_t keyCode = Layers[layer][chords[s1]-1];
 							uint8_t mods = Check_Mods(keyCode);
@@ -579,15 +586,16 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 						Chord_OnlyMods[side] = false;
 					}
 				}
+				if (! (Chords[s1] || Chords[s2])) {
+					if (Chord_OnlyMods[side] && Mods0) {
+						Mods1 = Mods0;
+					}
+					Chord_OnlyMods[side] = true;
+				}
 			} else if (Chords[s1] > chords[s1] || Chords[s2] > chords[s2]) {
 				Chord_Growing[side] = true;
 				if (chords[s1]) Chord_UpFirst[side] = false;
 				if (chords[s2]) Chord_UpFirst[side] = true;
-			} else if (! (Chords[s1] || Chords[s2])) {
-				if (Chord_OnlyMods[side] && Mods0) {
-					Mods1 = Mods0;
-				}
-				Chord_OnlyMods[side] = true;
 			}
 		}
 
@@ -605,6 +613,8 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 		if (usedKeyCodes) {
 			Mods1 = 0;
 		}
+
+		LED_Switch(Mods1);
 
 		*ReportSize = sizeof(USB_KeyboardReport_Data_t);
 		return false;
