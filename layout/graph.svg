@@ -190,9 +190,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1.4"
-     inkscape:cx="437.73765"
-     inkscape:cy="589.87182"
+     inkscape:zoom="3.959798"
+     inkscape:cx="531.17813"
+     inkscape:cy="887.60496"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -7354,7 +7354,7 @@
          x="122.3228"
          y="174.98071"
          id="tspan5430-6-6-0"
-         style="font-size:6.25px">Down</tspan><tspan
+         style="font-size:6.25px">Up</tspan><tspan
          sodipodi:role="line"
          x="122.3228"
          y="186.53102"
@@ -7374,7 +7374,7 @@
          y="175.05151"
          x="86.983932"
          sodipodi:role="line"
-         style="font-size:6.25px">Up</tspan><tspan
+         style="font-size:6.25px">Down</tspan><tspan
          y="186.60182"
          x="86.983932"
          sodipodi:role="line"
@@ -8847,13 +8847,13 @@
          id="tspan14007"
          y="150.19914"
          x="449.74451"
-         sodipodi:role="line">Up</tspan><tspan
+         sodipodi:role="line">Down</tspan><tspan
          id="tspan14009"
          y="158.01164"
          x="449.74451"
          sodipodi:role="line"><tspan
            id="tspan5734"
-           style="font-size:6.25px">ScrollU</tspan></tspan></text>
+           style="font-size:6.25px">ScrollD</tspan></tspan></text>
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:10px;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
@@ -8867,14 +8867,14 @@
          sodipodi:role="line"
          x="485.27203"
          y="150.19914"
-         id="tspan14015">Down</tspan><tspan
+         id="tspan14015">Up</tspan><tspan
          id="tspan14017"
          style="font-size:10px"
          sodipodi:role="line"
          x="485.27203"
          y="158.01164"><tspan
            id="tspan5738"
-           style="font-size:6.25px">ScrollD</tspan></tspan></text>
+           style="font-size:6.25px">ScrollU</tspan></tspan></text>
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:10px;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
@@ -9119,7 +9119,7 @@
          x="279.32986"
          y="174.98071"
          id="tspan5430-6-6-0-6"
-         style="font-size:6.25px">Up</tspan><tspan
+         style="font-size:6.25px">Down</tspan><tspan
          sodipodi:role="line"
          x="279.32986"
          y="186.53102"
@@ -9139,7 +9139,7 @@
          y="175.05151"
          x="314.85733"
          sodipodi:role="line"
-         style="font-size:6.25px">Down</tspan><tspan
+         style="font-size:6.25px">Up</tspan><tspan
          y="186.60182"
          x="314.85733"
          sodipodi:role="line"
@@ -9317,14 +9317,14 @@
          sodipodi:role="line"
          x="625.56842"
          y="150.19914"
-         id="tspan14015-1">Up</tspan><tspan
+         id="tspan14015-1">Down</tspan><tspan
          id="tspan14017-8"
          style="font-size:10px"
          sodipodi:role="line"
          x="625.56842"
          y="158.01164"><tspan
            id="tspan5738-7"
-           style="font-size:6.25px">ScrollU</tspan></tspan></text>
+           style="font-size:6.25px">ScrollD</tspan></tspan></text>
     <text
        sodipodi:linespacing="125%"
        id="text14005-9"
@@ -9338,13 +9338,13 @@
          id="tspan14007-2"
          y="150.19914"
          x="661.09161"
-         sodipodi:role="line">Down</tspan><tspan
+         sodipodi:role="line">Up</tspan><tspan
          id="tspan14009-0"
          y="158.01164"
          x="661.09161"
          sodipodi:role="line"><tspan
            id="tspan5734-2"
-           style="font-size:6.25px">ScrollD</tspan></tspan></text>
+           style="font-size:6.25px">ScrollU</tspan></tspan></text>
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:10px;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"

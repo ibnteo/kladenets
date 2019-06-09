@@ -1,7 +1,7 @@
 /*
 * Project: Chord keyboard Kladenets-2
-* Version: 0.1 (pre-pre alpha)
-* Date: 2019-06-08
+* Version: 0.2 (pre alpha)
+* Date: 2019-06-09
 * Author: Vladimir Romanovich <ibnteo@gmail.com>
 * License: MIT
 * https://github.com/ibnteo/kladenets
@@ -26,7 +26,7 @@ void Ports_Init() {
 	DDRC  |= 0b01110000; // C4,C5,C6
 	PORTC |= 0b01110000;
 	DDRD  |= 0b01100011; // D0,D1,D5, D6(Led)
-	PORTD |= 0b01100011; // LED Off
+	PORTD |= 0b01100011; // + LED Off
 
 	// Init rows (PullUp)
 	DDRB &= ~0b00010010; // B1,B4
@@ -226,15 +226,15 @@ void EVENT_USB_Device_StartOfFrame(void)
 #define KEYBOARD_MOD 0x00
 
 #define LAYER1 0
-#define LAYER_NUM1 1
-#define LAYER_NUM2 2
-#define LAYER_NAV 3
-#define LAYER_MOU 4
-#define LAYER_SYM1 5
-#define LAYER_SYM2 6
-#define LAYER2 7
+#define LAYER2 1
+#define LAYER_NUM1 2
+#define LAYER_NUM2 3
+#define LAYER_NAV 4
+#define LAYER_MOU 5
+#define LAYER_SYM1 6
+#define LAYER_SYM2 7
 
-uint8_t Layers[4][31] = {
+uint8_t Layers[5][31] = {
 	{ // Lay1
 		KEYBOARD_LAYER,				// 0000 1 Nav
 		HID_KEYBOARD_SC_O,			// 0001 0
@@ -267,6 +267,49 @@ uint8_t Layers[4][31] = {
 		HID_KEYBOARD_SC_G,			// 1110 1
 		HID_KEYBOARD_SC_Y,			// 1111 0
 		HID_KEYBOARD_SC_LEFT_SHIFT	// 1111 1 Shift
+	},
+	{ // Lay2
+		/*
+		qwertyuiop[]
+		йцукенгшщзхъ
+
+		asdfghjkl;'
+		фывапролджэ
+
+		zxcvbnm,./
+		ячсмитьбю.
+		*/
+		KEYBOARD_LAYER,												// 0000 1 Nav
+		HID_KEYBOARD_SC_J,											// 0001 0
+		HID_KEYBOARD_SC_F,											// 0001 1
+		HID_KEYBOARD_SC_SPACE,										// 0010 0
+		HID_KEYBOARD_SC_Y,											// 0010 1
+		HID_KEYBOARD_SC_C,											// 0011 0
+		HID_KEYBOARD_SC_K,											// 0011 1
+		HID_KEYBOARD_SC_T,											// 0100 0
+		HID_KEYBOARD_SC_B,											// 0100 1
+		HID_KEYBOARD_SC_L,											// 0101 0
+		HID_KEYBOARD_SC_G,											// 0101 1
+		HID_KEYBOARD_SC_N,											// 0110 0
+		HID_KEYBOARD_SC_H,											// 0110 1
+		HID_KEYBOARD_SC_D,											// 0111 0
+		HID_KEYBOARD_SC_E,											// 0111 1
+		KEYBOARD_LAYER,												// 1000 0 Num
+		KEYBOARD_LAYER,												// 1000 1 Sym
+		HID_KEYBOARD_SC_Z,											// 1001 0
+		HID_KEYBOARD_SC_Q,											// 1001 1
+		HID_KEYBOARD_SC_M,											// 1010 0
+		HID_KEYBOARD_SC_COMMA_AND_LESS_THAN_SIGN,				// 1010 1
+		HID_KEYBOARD_SC_X,											// 1011 0
+		HID_KEYBOARD_SC_SEMICOLON_AND_COLON,					// 1011 1
+		HID_KEYBOARD_SC_R,											// 1100 0
+		HID_KEYBOARD_SC_V,											// 1100 1
+		HID_KEYBOARD_SC_OPENING_BRACKET_AND_OPENING_BRACE,	// 1101 0
+		HID_KEYBOARD_SC_P,											// 1101 1
+		HID_KEYBOARD_SC_GRAVE_ACCENT_AND_TILDE,				// 1110 0
+		HID_KEYBOARD_SC_U,											// 1110 1
+		HID_KEYBOARD_SC_S,											// 1111 0
+		HID_KEYBOARD_SC_LEFT_SHIFT									// 1111 1 Shift
 	},
 	{ // Num1
 		HID_KEYBOARD_SC_1_AND_EXCLAMATION,				// 0000 1
@@ -338,11 +381,11 @@ uint8_t Layers[4][31] = {
 		HID_KEYBOARD_SC_ESCAPE,								// 0000 1
 		HID_KEYBOARD_SC_RIGHT_ARROW,						// 0001 0
 		HID_KEYBOARD_SC_Q,									// 0001 1
-		HID_KEYBOARD_SC_DOWN_ARROW,						// 0010 0
+		HID_KEYBOARD_SC_UP_ARROW,							// 0010 0
 		HID_KEYBOARD_SC_DOT_AND_GREATER_THAN_SIGN,	// 0010 1
 		HID_KEYBOARD_SC_END,									// 0011 0
 		HID_KEYBOARD_SC_PAUSE,								// 0011 1
-		HID_KEYBOARD_SC_UP_ARROW,							// 0100 0
+		HID_KEYBOARD_SC_DOWN_ARROW,						// 0100 0
 		HID_KEYBOARD_SC_I,									// 0100 1
 		HID_KEYBOARD_SC_BACKSPACE,							// 0101 0
 		HID_KEYBOARD_SC_A,									// 0101 1
@@ -371,7 +414,32 @@ uint8_t Layers[4][31] = {
 
 bool Chord_Growing[2] = {true, true};
 bool Chord_UpFirst[2] = {true, true};
-uint8_t Mods = 0;
+bool Chord_OnlyMods[2] = {true, true};
+uint8_t Mods0 = 0;
+uint8_t Mods1 = 0;
+uint8_t Layer_Current = LAYER1;
+
+uint8_t Check_Mods(uint8_t keyCode) {
+	uint8_t mods = 0;
+	if (keyCode == HID_KEYBOARD_SC_LEFT_CONTROL) {
+		mods = HID_KEYBOARD_MODIFIER_LEFTCTRL;
+	} else if (keyCode == HID_KEYBOARD_SC_RIGHT_CONTROL) {
+		mods = HID_KEYBOARD_MODIFIER_RIGHTCTRL;
+	} else if (keyCode == HID_KEYBOARD_SC_LEFT_SHIFT) {
+		mods = HID_KEYBOARD_MODIFIER_LEFTSHIFT;
+	} else if (keyCode == HID_KEYBOARD_SC_RIGHT_SHIFT) {
+		mods = HID_KEYBOARD_MODIFIER_RIGHTSHIFT;
+	} else if (keyCode == HID_KEYBOARD_SC_LEFT_ALT) {
+		mods = HID_KEYBOARD_MODIFIER_LEFTALT;
+	} else if (keyCode == HID_KEYBOARD_SC_RIGHT_ALT) {
+		mods = HID_KEYBOARD_MODIFIER_RIGHTALT;
+	} else if (keyCode == HID_KEYBOARD_SC_LEFT_GUI) {
+		mods = HID_KEYBOARD_MODIFIER_LEFTGUI;
+	} else if (keyCode == HID_KEYBOARD_SC_RIGHT_GUI) {
+		mods = HID_KEYBOARD_MODIFIER_RIGHTGUI;
+	}
+	return mods;
+}
 
 /** HID class driver callback function for the creation of HID reports to the host.
  *
@@ -396,14 +464,13 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 	if (HIDInterfaceInfo == &Keyboard_HID_Interface) {
 		USB_KeyboardReport_Data_t* KeyboardReport = (USB_KeyboardReport_Data_t*)ReportData;
 
-		KeyboardReport->Modifier = Mods;
-
 		uint8_t chords[4] = {Chords[0], Chords[1], Chords[2], Chords[3]};
 	
 		uint8_t usedKeyCodes = 0;
 
+		LED_Switch(Mods0 | Mods1);
+
 		Keyboard_Scan();
-		uint8_t mods = 0;
 		bool setShift = false;
 		bool clearShift = false;
 
@@ -413,7 +480,7 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 			if (Chords[s1] < chords[s1] || Chords[s2] < chords[s2]) {
 				if (Chord_Growing[side]) {
 					Chord_Growing[side] = false;
-					uint8_t layer = LAYER1;
+					uint8_t layer = Layer_Current;
 					if (chords[s2] == CHORD_NUM && (chords[s1] != CHORD_NAV || Chord_UpFirst[side])) {
 						layer = LAYER_NUM1;
 						if (chords[s1]) {
@@ -435,6 +502,9 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 								setShift = true;
 							}
 							KeyboardReport->KeyCode[usedKeyCodes++] = keyCode;
+							if (keyCode == HID_KEYBOARD_SC_NUM_LOCK) {
+								//LED_Toggle();
+							}
 						} else {
 							KeyboardReport->KeyCode[usedKeyCodes++] = Layers[layer][15];
 						}
@@ -446,28 +516,13 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 						} else {
 							KeyboardReport->KeyCode[usedKeyCodes++] = Layers[layer][15];
 						}
-					} else if (chords[s2] == CHORD_NAV) {
-						// Mouse
 					} else if (chords[s1] == CHORD_NAV) {
 						layer = LAYER_NAV;
 						if (chords[s2]) {
 							uint8_t keyCode = Layers[layer][chords[s2]-1];
-							if (keyCode == HID_KEYBOARD_SC_LEFT_CONTROL) {
-								KeyboardReport->Modifier |= HID_KEYBOARD_MODIFIER_LEFTCTRL;
-							} else if (keyCode == HID_KEYBOARD_SC_RIGHT_CONTROL) {
-								KeyboardReport->Modifier |= HID_KEYBOARD_MODIFIER_RIGHTCTRL;
-							} else if (keyCode == HID_KEYBOARD_SC_LEFT_SHIFT) {
-								KeyboardReport->Modifier |= HID_KEYBOARD_MODIFIER_LEFTSHIFT;
-							} else if (keyCode == HID_KEYBOARD_SC_RIGHT_SHIFT) {
-								KeyboardReport->Modifier |= HID_KEYBOARD_MODIFIER_RIGHTSHIFT;
-							} else if (keyCode == HID_KEYBOARD_SC_LEFT_ALT) {
-								KeyboardReport->Modifier |= HID_KEYBOARD_MODIFIER_LEFTALT;
-							} else if (keyCode == HID_KEYBOARD_SC_RIGHT_ALT) {
-								KeyboardReport->Modifier |= HID_KEYBOARD_MODIFIER_RIGHTALT;
-							} else if (keyCode == HID_KEYBOARD_SC_LEFT_GUI) {
-								KeyboardReport->Modifier |= HID_KEYBOARD_MODIFIER_LEFTGUI;
-							} else if (keyCode == HID_KEYBOARD_SC_RIGHT_GUI) {
-								KeyboardReport->Modifier |= HID_KEYBOARD_MODIFIER_RIGHTGUI;
+							uint8_t mods = Check_Mods(keyCode);
+							if (mods) {
+								Mods0 ^= mods;
 							} else {
 								if (keyCode == HID_KEYBOARD_SC_RIGHT_ARROW && s1) {
 									keyCode = HID_KEYBOARD_SC_LEFT_ARROW;
@@ -481,31 +536,74 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 								KeyboardReport->KeyCode[usedKeyCodes++] = keyCode;
 							}
 						} else {
-							// TODO: set Rus Layer
+							if (Layer_Current != LAYER1) {
+								//Mods0 = HID_KEYBOARD_MODIFIER_LEFTSHIFT | HID_KEYBOARD_MODIFIER_LEFTALT;
+								KeyboardReport->Modifier = HID_KEYBOARD_MODIFIER_LEFTSHIFT | HID_KEYBOARD_MODIFIER_LEFTALT;
+							}
+							Layer_Current = LAYER1;
+							//LED_Off();
+						}
+					} else if (chords[s2] == CHORD_NAV) {
+						layer = LAYER_MOU;
+						if (chords[s1]) {
+							// TODO: Mouse layer
+						} else {
+							if (Layer_Current != LAYER2) {
+								//Mods0 = HID_KEYBOARD_MODIFIER_LEFTSHIFT | HID_KEYBOARD_MODIFIER_LEFTALT;
+								KeyboardReport->Modifier = HID_KEYBOARD_MODIFIER_LEFTSHIFT | HID_KEYBOARD_MODIFIER_LEFTALT;
+							}
+							Layer_Current = LAYER2;
+							//LED_On();
 						}
 					} else {
 						if (chords[s1]) {
 							uint8_t keyCode = Layers[layer][chords[s1]-1];
-							KeyboardReport->KeyCode[usedKeyCodes++] = keyCode;
+							uint8_t mods = Check_Mods(keyCode);
+							if (mods) {
+								Mods1 ^= mods;
+							} else {
+								KeyboardReport->KeyCode[usedKeyCodes++] = keyCode;
+							}
 						}
 						if (chords[s2]) {
 							uint8_t keyCode = Layers[layer][chords[s2]-1];
-							KeyboardReport->KeyCode[usedKeyCodes++] = keyCode;
+							uint8_t mods = Check_Mods(keyCode);
+							if (mods) {
+								Mods1 ^= mods;
+							} else {
+								KeyboardReport->KeyCode[usedKeyCodes++] = keyCode;
+							}
  						}
+					}
+					if (usedKeyCodes) {
+						Chord_OnlyMods[side] = false;
 					}
 				}
 			} else if (Chords[s1] > chords[s1] || Chords[s2] > chords[s2]) {
 				Chord_Growing[side] = true;
 				if (chords[s1]) Chord_UpFirst[side] = false;
 				if (chords[s2]) Chord_UpFirst[side] = true;
+			} else if (! (Chords[s1] || Chords[s2])) {
+				if (Chord_OnlyMods[side] && Mods0) {
+					Mods1 = Mods0;
+				}
+				Chord_OnlyMods[side] = true;
 			}
 		}
 
+		KeyboardReport->Modifier |= Mods0 | Mods1;
 		if (clearShift) {
 			KeyboardReport->Modifier &= ~(HID_KEYBOARD_MODIFIER_LEFTSHIFT | HID_KEYBOARD_MODIFIER_RIGHTSHIFT);
 		}
 		if (setShift && !(KeyboardReport->Modifier & (HID_KEYBOARD_MODIFIER_LEFTSHIFT | HID_KEYBOARD_MODIFIER_RIGHTSHIFT))) {
 			KeyboardReport->Modifier |= HID_KEYBOARD_MODIFIER_LEFTSHIFT;
+		}
+
+		if (! (Chords[0] || Chords[1] || Chords[2] || Chords[3])) {
+			Mods0 = 0;
+		}
+		if (usedKeyCodes) {
+			Mods1 = 0;
 		}
 
 		*ReportSize = sizeof(USB_KeyboardReport_Data_t);
@@ -551,17 +649,20 @@ void CALLBACK_HID_Device_ProcessHIDReport(USB_ClassInfo_HID_Device_t* const HIDI
 {
 	if (HIDInterfaceInfo == &Keyboard_HID_Interface)
 	{
-		/*uint8_t  LEDMask   = LEDS_NO_LEDS;
 		uint8_t* LEDReport = (uint8_t*)ReportData;
+
+		if (*LEDReport & HID_KEYBOARD_LED_CAPSLOCK) {
+		  LED_On();
+		}
+
+		if (*LEDReport & HID_KEYBOARD_LED_SCROLLLOCK) {
+		  LED_On();
+		}
+
+		/*uint8_t  LEDMask   = LEDS_NO_LEDS;
 
 		if (*LEDReport & HID_KEYBOARD_LED_NUMLOCK)
 		  LEDMask |= LEDS_LED1;
-
-		if (*LEDReport & HID_KEYBOARD_LED_CAPSLOCK)
-		  LEDMask |= LEDS_LED3;
-
-		if (*LEDReport & HID_KEYBOARD_LED_SCROLLLOCK)
-		  LEDMask |= LEDS_LED4;
 
 		LEDs_SetAllLEDs(LEDMask);*/
 	}
