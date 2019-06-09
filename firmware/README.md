@@ -6,12 +6,12 @@ The old version of the LUFA library is used, because the new one for some reason
 
 ## Compile
 
-	Compile to .hex file:
+Compile to .hex file:
 
 	$ make
 
 ## Flash
 
-	Press the button on the controller and run the command:
+Press the button on the controller and run the command:
 
 	$ make dfu
