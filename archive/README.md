@@ -2,7 +2,7 @@
 
 Kladenets-2 is a chord keyboard for printing up to 4 letters in one chord with both hands. Theoretically, it will speed up printing by 2 times compared to standard keyboards.
 
-![](photo/kl2-r.jpg)
+![](../photo/kl2-r.jpg)
 
 Allows you to fully work with one hand, even with your left, even with your right. Can control the mouse cursor as a text cursor, as well as use both vertical and horizontal scrolling.
 
@@ -97,20 +97,20 @@ It is very difficult to remember chords on the tables; it is better to memorize 
 
 ## Schema
 
-![](schema/schema.png)
+![](../schema/schema.png)
 
 ## The case of wooden slats 5x10 mm
 
-![](spline/spline.png)
+![](../spline/spline.png)
 
-[SVG](spline/spline.svg)
+[SVG](../spline/spline.svg)
 
 ## 1.5 mm aluminum plate body
 
-![](aluminium/kladenets.png)
+![](../aluminium/kladenets.png)
 
-[SVG1](aluminium/kladenets1.svg)
-[SVG2](aluminium/kladenets2.svg)
+[SVG1](../aluminium/kladenets1.svg)
+[SVG2](../aluminium/kladenets2.svg)
 
 ## Kladenets-3
 
@@ -141,7 +141,7 @@ If printing with one hand on two chords is not convenient, you can consider the 
 
 ## License
 
-[License MIT](LICENSE.txt)
+[License MIT](../LICENSE.txt)
 
 ---
 

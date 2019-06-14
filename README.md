@@ -14,13 +14,15 @@ For the vowel letters, the buttons on the thumb and forefinger are highlighted, 
 
 The consonants are typed on the five buttons with the middle and ring finger, and the little finger, the lower button on the little finger is a clever space, due to which you can complete any chord with a space, there are 31 chords in this block.
 
-The external button on the tamba is the Quasi button, which gives on the finger (8 buttons) up to 255 chords. Quasi allows you to hold down the modifiers (Shift, Ctrl, Alt, Win), as well as the mouse buttons, until the Quasi button is pressed.
+The external button on the thumb is the Quasi button, which gives on the fingers (8 buttons) up to 255 chords. Quasi allows you to hold down the modifiers (Shift, Ctrl, Alt, Win), as well as the mouse buttons, until the Quasi button is pressed.
 
 In the Quasi layer are also placed all the letters, the chords of the letters are roughly similar to those in the main layer, you need this for keyboard combinations with modifiers.
 
 ## Keyboard layout
 
-...
+![](layout/layout.png)
+
+[SVG](layout/layout.svg)
 
 ## Chords
 
@@ -45,7 +47,7 @@ In the Quasi layer are also placed all the letters, the chords of the letters ar
 
 ## Concept keyboards Kladenets-2 (3,1,M)
 
-This concept was preceded by Kladenets-23, but there were shortcomings in the form of the need to have the Quasi button for letters, so it was sent to the archive: [kladenets2](kladenets2/). There is also a brief description of the unsuccessful button layout of the Kladenets-24 concept, the closest predecessor of the Kladents-23.
+This concept was preceded by Kladenets-23, but there were shortcomings in the form of the need to have the Quasi button for letters, so it was sent to the [archive](archive/). There is also a brief description of the unsuccessful button layout of the Kladenets-24 concept, the closest predecessor of the Kladents-23.
 
 ## License
 
