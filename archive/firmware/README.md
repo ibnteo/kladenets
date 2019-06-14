@@ -1,6 +1,6 @@
 # Firmware
 
-Keyboard port settings and port scan are in the `kladenets23.c` file in the functions `Ports_Init()` and `Keyboard_Scan()`, can customize the scan of any keyboard with any matrix.
+Keyboard port settings and port scan are in the `kladenets2.c` file in the functions `Ports_Init()` and `Keyboard_Scan()`, can customize the scan of any keyboard with any matrix.
 
 The old version of the LUFA library is used, because the new one for some reason does not work in the controllers I have (Microsin162).
 
