@@ -1,7 +1,7 @@
 /*
 * Project: Chord keyboard Kladenets-23
-* Version: 0.3 (pre alpha)
-* Date: 2019-06-14
+* Version: 0.4 (alpha)
+* Date: 2019-06-15
 * Author: Vladimir Romanovich <ibnteo@gmail.com>
 * License: MIT
 * https://github.com/ibnteo/kladenets
@@ -264,11 +264,11 @@ static uint8_t Layer_Vowels[2][11] = {
 		HID_KEYBOARD_SC_SPACE,						// 01 00
 		HID_KEYBOARD_SC_A,							// 01 01
 		HID_KEYBOARD_SC_I,							// 01 10
-		0,													// 01 11
+		0,													// 01 11 ou
 		HID_KEYBOARD_SC_APOSTROPHE_AND_QUOTE,	// 10 00
-		0,													// 10 01
-		0,													// 10 10
-		0,													// 10 11
+		0,													// 10 01 ea
+		0,													// 10 10 io
+		0													// 10 11 ae
 	},
 	{
 		HID_KEYBOARD_RU_O,			// 00 01
@@ -281,7 +281,7 @@ static uint8_t Layer_Vowels[2][11] = {
 		HID_KEYBOARD_RU_SOFT_SIGN,	// 10 00
 		HID_KEYBOARD_RU_YA,			// 10 01
 		HID_KEYBOARD_RU_YI,			// 10 10
-		HID_KEYBOARD_RU_YO,			// 10 11
+		HID_KEYBOARD_RU_YO			// 10 11
 	}
 };
 
@@ -318,7 +318,7 @@ static uint8_t Layer_Consonants[2][31] = {
 		HID_KEYBOARD_SC_G,									// 1 1100
 		HID_KEYBOARD_SC_Q,									// 1 1101
 		0,															// 1 1110 ght
-		HID_KEYBOARD_SC_EQUAL_AND_PLUS,					// 1 1111
+		HID_KEYBOARD_SC_EQUAL_AND_PLUS					// 1 1111
 	},
 	{
 		HID_KEYBOARD_RU_R,									// 0 0001
@@ -351,131 +351,128 @@ static uint8_t Layer_Consonants[2][31] = {
 		HID_KEYBOARD_RU_G,									// 1 1100
 		HID_KEYBOARD_RU_Q,									// 1 1101
 		HID_KEYBOARD_RU_HARD_SIGN,							// 1 1110
-		HID_KEYBOARD_SC_EQUAL_AND_PLUS,					// 1 1111
+		HID_KEYBOARD_SC_EQUAL_AND_PLUS					// 1 1111
 	}
 };
 
-static uint8_t Layer_NavMou[2][31] = {
-	{
-		0, // 000 01
-		0, // 000 10
-		0, // 000 11
-		0, // 001 00
-		0, // 001 01
-		0, // 001 10
-		0, // 001 11
-		0, // 010 00
-		0, // 010 01
-		0, // 010 10
-		0, // 010 11
-		0, // 011 00
-		0, // 011 01
-		0, // 011 10
-		0, // 011 11
-		0, // 100 00
-		0, // 100 01
-		0, // 100 10
-		0, // 100 11
-		0, // 101 00
-		0, // 101 01
-		0, // 101 10
-		0, // 101 11
-		0, // 110 00
-		0, // 110 01
-		0, // 110 10
-		0, // 110 11
-		0, // 111 00
-		0, // 111 01
-		0, // 111 10
-		0, // 111 11
-	},
-	{
-		0, // 000 01
-		0, // 000 10
-		0, // 000 11
-		0, // 001 00
-		0, // 001 01
-		0, // 001 10
-		0, // 001 11
-		0, // 010 00
-		0, // 010 01
-		0, // 010 10
-		0, // 010 11
-		0, // 011 00
-		0, // 011 01
-		0, // 011 10
-		0, // 011 11
-		0, // 100 00
-		0, // 100 01
-		0, // 100 10
-		0, // 100 11
-		0, // 101 00
-		0, // 101 01
-		0, // 101 10
-		0, // 101 11
-		0, // 110 00
-		0, // 110 01
-		0, // 110 10
-		0, // 110 11
-		0, // 111 00
-		0, // 111 01
-		0, // 111 10
-		0, // 111 11
-	}
+// Navigation for the left hand
+static uint8_t Layer_NavMou[63] = {
+	0,											// 000001 Mou
+	HID_KEYBOARD_SC_LEFT_ARROW,		// 000010
+	HID_KEYBOARD_SC_HOME,				// 000011
+	HID_KEYBOARD_SC_UP_ARROW,			// 000100
+	HID_KEYBOARD_SC_RIGHT_CONTROL,	// 000101
+	HID_KEYBOARD_SC_PAGE_UP,			// 000110
+	0, // 000111
+	HID_KEYBOARD_SC_DOWN_ARROW,		// 001000
+	HID_KEYBOARD_SC_PAGE_DOWN,			// 001001
+	HID_KEYBOARD_SC_LEFT_CONTROL,		// 001010
+	0, // 001011
+	0, // 001100
+	0, // 001101
+	0, // 001110
+	0, // 001111
+	HID_KEYBOARD_SC_DELETE,				// 010000
+	HID_KEYBOARD_SC_RIGHT_GUI,			// 010001
+	0, // 010010
+	0, // 010011
+	HID_KEYBOARD_SC_RIGHT_ALT,			// 010100
+	HID_KEYBOARD_SC_LEFT_SHIFT,		// 010101
+	0, // 010110
+	0, // 010111
+	HID_KEYBOARD_SC_INSERT,				// 011000
+	0, // 011001
+	0, // 011010
+	0, // 011011
+	0, // 011100
+	0, // 011101
+	0, // 011110
+	0, // 011111
+	HID_KEYBOARD_SC_RIGHT_ARROW,		// 100000
+	0,	// 100001
+	HID_KEYBOARD_SC_LEFT_GUI,			// 100010
+	0, // 100011
+	0, // 100100
+	0, // 100101
+	0, // 100110
+	0, // 100111
+	HID_KEYBOARD_SC_LEFT_ALT,			// 101000
+	0, // 101001
+	HID_KEYBOARD_SC_LEFT_SHIFT,		// 101010
+	0, // 101011
+	0, // 101100
+	0, // 101101
+	0, // 101110
+	0, // 101111
+	HID_KEYBOARD_SC_END,					// 110000
+	0, // 110001
+	0, // 110010
+	0, // 110011
+	0, // 110100
+	0, // 110101
+	0, // 110110
+	0, // 110111
+	0, // 111000
+	0, // 111001
+	0, // 111010
+	0, // 111011
+	0, // 111100
+	0, // 111101
+	0, // 111110
+	0	// 111111
 };
 
-static uint8_t Layer_NumFunc[3][15] = {
-	{
-		0, // 00 01
-		0, // 00 10
-		0, // 00 11
-		0, // 01 00
-		0, // 01 01
-		0, // 01 10
-		0, // 01 11
-		0, // 10 00
-		0, // 10 01
-		0, // 10 10
-		0, // 10 11
-		0, // 11 00
-		0, // 11 01
-		0, // 11 10
-		0, // 11 11
-	},
-	{
-		0, // 00 01
-		0, // 00 10
-		0, // 00 11
-		0, // 01 00
-		0, // 01 01
-		0, // 01 10
-		0, // 01 11
-		0, // 10 00
-		0, // 10 01
-		0, // 10 10
-		0, // 10 11
-		0, // 11 00
-		0, // 11 01
-		0, // 11 10
-		0, // 11 11
-	},
-	{
-		0, // 00 01
-		0, // 00 10
-		0, // 00 11
-		0, // 01 00
-		0, // 01 01
-		0, // 01 10
-		0, // 01 11
-		0, // 10 00
-		0, // 10 01
-		0, // 10 10
-		0, // 10 11
-		0, // 11 00
-		0, // 11 01
-		0, // 11 10
-		0, // 11 11
-	}
+static uint8_t Layer_Num[48] = {
+	HID_KEYBOARD_SC_BACKSPACE,		// 010000 Backspace
+	HID_KEYBOARD_SC_F4,				// 010001
+	HID_KEYBOARD_SC_F8,				// 010010
+	HID_KEYBOARD_SC_F12,				// 010011
+	HID_KEYBOARD_SC_F1,				// 010100
+	HID_KEYBOARD_SC_F5,				// 010101
+	HID_KEYBOARD_SC_F9,				// 010110
+	HID_KEYBOARD_SC_CAPS_LOCK,		// 010111
+	HID_KEYBOARD_SC_F2,				// 011000
+	HID_KEYBOARD_SC_F6,				// 011001
+	HID_KEYBOARD_SC_F10,				// 011010
+	HID_KEYBOARD_SC_SCROLL_LOCK,	// 011011
+	HID_KEYBOARD_SC_F3,				// 011100
+	HID_KEYBOARD_SC_F7,				// 011101
+	HID_KEYBOARD_SC_F11,				// 011110
+	HID_KEYBOARD_SC_NUM_LOCK,		// 011111
+
+	HID_KEYBOARD_SC_ENTER,								// 100000 Enter
+	HID_KEYBOARD_SC_4_AND_DOLLAR,						// 100001
+	HID_KEYBOARD_SC_8_AND_ASTERISK,					// 100010
+	HID_KEYBOARD_SC_EQUAL_AND_PLUS,					// 100011
+	HID_KEYBOARD_SC_1_AND_EXCLAMATION,				// 100100
+	HID_KEYBOARD_SC_5_AND_PERCENTAGE,				// 100101
+	HID_KEYBOARD_SC_9_AND_OPENING_PARENTHESIS,	// 100110
+	HID_KEYBOARD_SC_SLASH_AND_QUESTION_MARK,		// 100111
+	HID_KEYBOARD_SC_2_AND_AT,							// 101000
+	HID_KEYBOARD_SC_6_AND_CARET,						// 101001
+	HID_KEYBOARD_SC_0_AND_CLOSING_PARENTHESIS,	// 101010
+	0,															// 101011 * (Shift+8)
+	HID_KEYBOARD_SC_3_AND_HASHMARK,					// 101100
+	HID_KEYBOARD_SC_7_AND_AND_AMPERSAND,			// 101101
+	HID_KEYBOARD_SC_MINUS_AND_UNDERSCORE,			// 101110
+	HID_KEYBOARD_SC_DOT_AND_GREATER_THAN_SIGN,	// 101111
+
+	HID_KEYBOARD_SC_KEYPAD_ENTER,					// 110000 Enter (Numpad)
+	HID_KEYBOARD_SC_KEYPAD_4_AND_LEFT_ARROW,	// 110001
+	HID_KEYBOARD_SC_KEYPAD_8_AND_UP_ARROW,		// 110010
+	HID_KEYBOARD_SC_KEYPAD_PLUS,					// 110011
+	HID_KEYBOARD_SC_KEYPAD_1_AND_END,			// 110100
+	HID_KEYBOARD_SC_KEYPAD_5,						// 110101
+	HID_KEYBOARD_SC_KEYPAD_9_AND_PAGE_UP,		// 110110
+	HID_KEYBOARD_SC_KEYPAD_SLASH,					// 110111
+	HID_KEYBOARD_SC_KEYPAD_2_AND_DOWN_ARROW,	// 111000
+	HID_KEYBOARD_SC_KEYPAD_6_AND_RIGHT_ARROW,	// 111001
+	HID_KEYBOARD_SC_KEYPAD_0_AND_INSERT,		// 111010
+	HID_KEYBOARD_SC_KEYPAD_ASTERISK,				// 111011
+	HID_KEYBOARD_SC_KEYPAD_3_AND_PAGE_DOWN,	// 111100
+	HID_KEYBOARD_SC_KEYPAD_7_AND_HOME,			// 111101
+	HID_KEYBOARD_SC_KEYPAD_MINUS,					// 111110
+	HID_KEYBOARD_SC_KEYPAD_DOT_AND_DELETE		// 111111
 };
 
 #define LAYER1 0
@@ -485,10 +482,13 @@ static uint8_t Layer_NumFunc[3][15] = {
 #define OS_WINDOWS 1
 #define OS_MAC 2
 
+#define NAV_MODE 0
+#define MOU_MODE 1
+
 bool Chord_Growing[2] = {true, true};
 uint8_t Q_Mods = 0;
+uint8_t Q_Nav = NAV_MODE;
 uint8_t Layer_Current = LAYER1;
-
 uint8_t OS_Mode = OS_LINUX;
 uint8_t EE_OS_Mode EEMEM; // = OS_LINUX;
 void Settings_Get() {
@@ -550,6 +550,9 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 			for (uint8_t side=0; side<=1; side++) {
 				uint16_t chord2 = chords[side]; 
 				if (Chords[side] < chord2) {
+					if ((Chords[side] & 0x300) != 0x200) {
+						Q_Mods = 0;
+					}
 					if (Chord_Growing[side]) {
 						Chord_Growing[side] = false;
 						if (chord2 == 0x200 || chord2 == 0x80) { // Layer change
@@ -572,9 +575,35 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 						} else if ((chord2 & 0x300) == 0x200) { // Quasi
 							uint8_t chord = chord2;
 							if ((chord & 0xC0) && ! (chord & 0x03)) { // Num
-
-							} else {
-								
+								chord = (chord & 0xFC) >> 2;
+								uint8_t keyCode = Layer_Num[(chord & 0x3F) - 0x10];
+								if (! keyCode) {
+									if (chord == 0b00101011) { // * (Shift+8)
+										keyCode = HID_KEYBOARD_SC_8_AND_ASTERISK;
+										setShift = true;
+										KeyboardReport->KeyCode[usedKeyCodes++] = keyCode;
+									}
+								} else {
+									if (keyCode == HID_KEYBOARD_SC_EQUAL_AND_PLUS) { // = +
+										setShift = true;
+									} else if (keyCode == HID_KEYBOARD_SC_DOT_AND_GREATER_THAN_SIGN && Layer_Current == LAYER2) { // , Rus
+										keyCode = HID_KEYBOARD_SC_SLASH_AND_QUESTION_MARK;
+										setShift = true;
+									}
+									KeyboardReport->KeyCode[usedKeyCodes++] = keyCode;
+								}
+							} else if (Q_Nav == NAV_MODE) { // Nav
+								uint8_t keyCode = Layer_NavMou[(chord & 0x3F) - 1];
+								if (! keyCode) {
+									// TODO: Mou, Mods
+								} else {
+									if (keyCode >= HID_KEYBOARD_SC_LEFT_CONTROL && keyCode <= HID_KEYBOARD_SC_RIGHT_GUI) {
+										mods ^= keyCode - HID_KEYBOARD_SC_LEFT_CONTROL + 1;
+										Q_Mods = mods;
+									} else {
+										KeyboardReport->KeyCode[usedKeyCodes++] = keyCode;
+									}
+								}
 							}
 						} else {
 							bool isConsonants = chord2 & 0x07C;
