@@ -1,5 +1,3 @@
-uint16_t Chords[2] = {0, 0};
-
 void Ports_Init() {
 
 	// Init cols
