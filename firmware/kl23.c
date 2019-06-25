@@ -1,7 +1,7 @@
 /*
 * Project: Chord keyboard Kladenets-23
-* Version: 0.8 (pre release)
-* Date: 2019-06-24
+* Version: 0.9 (pre release)
+* Date: 2019-06-25
 * Author: Vladimir Romanovich <ibnteo@gmail.com>
 * License: MIT
 * https://github.com/ibnteo/kladenets
@@ -29,34 +29,45 @@ uint16_t Chords[2] = {0, 0};
 
 #define MACROS_BUFFER_SIZE 40
 uint8_t Macros_Buffer[MACROS_BUFFER_SIZE];
-uint8_t Buffer_Last = 0;
 
 bool Chord_Growing = true;
 uint8_t Q_Mods = 0;
 uint8_t Q_Nav = NAV_MODE;
 uint8_t Layer_Current = LAYER1;
 
+uint16_t Time_Tick = 0;
+uint16_t Chord_Tick = 0;
+uint16_t Chords_Last[2] = {0, 0};
+
 // EEPROM Settings
 #define LAYOUTS_ENG 0
 #define LAYOUTS_ENG_RUS 1
+
+uint8_t Layout_Mode = LAYOUTS_ENG;
+uint8_t EE_Layout_Mode EEMEM;
 
 #define OS_LINUX 0
 #define OS_WINDOWS 1
 #define OS_MAC 2
 
-uint8_t Layout_Mode = LAYOUTS_ENG;
-uint8_t EE_Layout_Mode EEMEM;
-
 uint8_t OS_Mode = OS_LINUX;
 uint8_t EE_OS_Mode EEMEM;
 
+#define REPEAT_OS 0
+#define REPEAT_KBD 1
+
+uint8_t Repeat_Mode = REPEAT_KBD;
+uint8_t EE_Repeat_Mode EEMEM;
+
 void Settings_Get() {
-	OS_Mode = eeprom_read_byte(&EE_OS_Mode);
 	Layout_Mode = eeprom_read_byte(&EE_Layout_Mode);
+	OS_Mode = eeprom_read_byte(&EE_OS_Mode);
+	Repeat_Mode = eeprom_read_byte(&EE_Repeat_Mode);
 }
 void Settings_Set() {
-	eeprom_write_byte(&EE_OS_Mode, OS_Mode);
 	eeprom_write_byte(&EE_Layout_Mode, Layout_Mode);
+	eeprom_write_byte(&EE_OS_Mode, OS_Mode);
+	eeprom_write_byte(&EE_Repeat_Mode, Repeat_Mode);
 }
 
 /** Buffer to hold the previously generated Keyboard HID report, for comparison purposes inside the HID class driver. */
@@ -205,33 +216,29 @@ void EVENT_USB_Device_StartOfFrame(void)
 #define HID_KEYBOARD_RU_DOT			HID_KEYBOARD_SC_SLASH_AND_QUESTION_MARK
 
 // Vowels for the right hand, bits 11xx are replaced by bits 10xx
-const uint8_t Layer_Vowels[2][11] PROGMEM = {
-	{
-		HID_KEYBOARD_SC_I,						// 00 01
-		HID_KEYBOARD_SC_O,						// 00 10
-		HID_KEYBOARD_SC_A,						// 00 11
-		HID_KEYBOARD_SC_SPACE,					// 01 00
-		HID_KEYBOARD_SC_Y,						// 01 01
-		HID_KEYBOARD_SC_U,						// 01 10
-		0,										// 01 11 ea
-		HID_KEYBOARD_SC_E,						// 10 00 
-		0,										// 10 01 io
-		0,										// 10 10 ou
-		HID_KEYBOARD_SC_APOSTROPHE_AND_QUOTE,	// 10 11 
-	},
-	{
-		HID_KEYBOARD_RU_I,			// 00 01	И
-		HID_KEYBOARD_RU_O,			// 00 10	О
-		HID_KEYBOARD_RU_A,			// 00 11	А
-		HID_KEYBOARD_SC_SPACE,		// 01 00	_
-		HID_KEYBOARD_RU_SOFT_SIGN,	// 01 01	Ь
-		HID_KEYBOARD_RU_U,			// 01 10	У
-		HID_KEYBOARD_RU_YA,			// 01 11	Я
-		HID_KEYBOARD_RU_E,			// 10 00	Е
-		HID_KEYBOARD_RU_YI,			// 10 01	Ы
-		HID_KEYBOARD_RU_YO,			// 10 10	Ё
-		HID_KEYBOARD_RU_YU,			// 10 11	Ю
-	}
+const uint8_t Layer_Vowels[22] PROGMEM = {
+	HID_KEYBOARD_SC_I,						// 00 01
+	HID_KEYBOARD_RU_I,						// 00 01	И
+	HID_KEYBOARD_SC_O,						// 00 10
+	HID_KEYBOARD_RU_O,						// 00 10	О
+	HID_KEYBOARD_SC_A,						// 00 11
+	HID_KEYBOARD_RU_A,						// 00 11	А
+	HID_KEYBOARD_SC_SPACE,					// 01 00
+	HID_KEYBOARD_SC_SPACE,					// 01 00	_
+	HID_KEYBOARD_SC_Y,						// 01 01
+	HID_KEYBOARD_RU_SOFT_SIGN,				// 01 01	Ь
+	HID_KEYBOARD_SC_U,						// 01 10
+	HID_KEYBOARD_RU_U,						// 01 10	У
+	0,										// 01 11 ea
+	HID_KEYBOARD_RU_YA,						// 01 11	Я
+	HID_KEYBOARD_SC_E,						// 10 00 
+	HID_KEYBOARD_RU_E,						// 10 00	Е
+	0,										// 10 01 io
+	HID_KEYBOARD_RU_YI,						// 10 01	Ы
+	0,										// 10 10 ou
+	HID_KEYBOARD_RU_YO,						// 10 10	Ё
+	HID_KEYBOARD_SC_APOSTROPHE_AND_QUOTE,	// 10 11 
+	HID_KEYBOARD_RU_YU,						// 10 11	Ю
 };
 
 /*// Test PROGMEM array
@@ -240,73 +247,69 @@ const uint8_t Test[31] PROGMEM = {
 };*/
 
 // Consonants for the left hand
-const uint8_t Layer_Consonants[2][31] PROGMEM = {
-	{
-		HID_KEYBOARD_SC_T,							// 0 0001
-		HID_KEYBOARD_SC_S,							// 0 0010
-		HID_KEYBOARD_SC_P,							// 0 0011
-		HID_KEYBOARD_SC_R,							// 0 0100
-		HID_KEYBOARD_SC_C,							// 0 0101
-		HID_KEYBOARD_SC_X,							// 0 0110
-		HID_KEYBOARD_SC_G,							// 0 0111
-		HID_KEYBOARD_SC_N,							// 0 1000
-		HID_KEYBOARD_SC_K,							// 0 1001
-		HID_KEYBOARD_SC_L,							// 0 1010
-		HID_KEYBOARD_SC_Z,							// 0 1011
-		HID_KEYBOARD_SC_D,							// 0 1100
-		HID_KEYBOARD_SC_J,							// 0 1101
-		HID_KEYBOARD_SC_B,							// 0 1110
-		HID_KEYBOARD_SC_M,							// 0 1111
-		HID_KEYBOARD_SC_H,							// 1 0000
-		HID_KEYBOARD_SC_W,							// 1 0001
-		HID_KEYBOARD_SC_Q,							// 1 0010
-		0,											// 1 0011 ???
-		HID_KEYBOARD_SC_V,							// 1 0100
-		HID_KEYBOARD_SC_LEFT_SHIFT,					// 1 0101
-		0,											// 1 0110 ()
-		0,											// 1 0111 ???
-		HID_KEYBOARD_SC_F,							// 1 1000
-		0,											// 1 1001 %#
-		HID_KEYBOARD_SC_Y,							// 1 1010
-		0,											// 1 1011
-		0,											// 1 1100 ???
-		0,											// 1 1101 ???
-		0,											// 1 1110 ???
-		0,											// 1 1111 .,
-	},
-	{
-		HID_KEYBOARD_RU_T,							// 0 0001
-		HID_KEYBOARD_RU_S,							// 0 0010
-		HID_KEYBOARD_RU_P,							// 0 0011
-		HID_KEYBOARD_RU_R,							// 0 0100
-		HID_KEYBOARD_RU_K,							// 0 0101
-		HID_KEYBOARD_RU_X,							// 0 0110
-		HID_KEYBOARD_RU_G,							// 0 0111
-		HID_KEYBOARD_RU_N,							// 0 1000
-		HID_KEYBOARD_RU_CH,							// 0 1001
-		HID_KEYBOARD_RU_L,							// 0 1010
-		HID_KEYBOARD_RU_Z,							// 0 1011
-		HID_KEYBOARD_RU_D,							// 0 1100
-		HID_KEYBOARD_RU_J,							// 0 1101
-		HID_KEYBOARD_RU_B,							// 0 1110
-		HID_KEYBOARD_RU_M,							// 0 1111
-		HID_KEYBOARD_RU_W,							// 1 0000
-		HID_KEYBOARD_RU_ZH,							// 1 0001
-		HID_KEYBOARD_RU_C,							// 1 0010
-		0,											// 1 0011 ???
-		HID_KEYBOARD_RU_SH,							// 1 0100
-		HID_KEYBOARD_SC_LEFT_SHIFT,					// 1 0101
-		0,											// 1 0110 ()
-		0,											// 1 0111 ???
-		HID_KEYBOARD_RU_SCH,						// 1 1000
-		0,											// 1 1001 %№
-		HID_KEYBOARD_RU_F,							// 1 1010
-		HID_KEYBOARD_RU_YE,							// 1 1011
-		0,											// 1 1100 ???
-		0,											// 1 1101 ???
-		HID_KEYBOARD_RU_HARD_SIGN,					// 1 1110
-		0,											// 1 1111 .,
-	}
+const uint8_t Layer_Consonants[62] PROGMEM = {
+	HID_KEYBOARD_SC_T,			// 0 0001
+	HID_KEYBOARD_RU_T,			// 0 0001
+	HID_KEYBOARD_SC_S,			// 0 0010
+	HID_KEYBOARD_RU_S,			// 0 0010
+	HID_KEYBOARD_SC_P,			// 0 0011
+	HID_KEYBOARD_RU_P,			// 0 0011
+	HID_KEYBOARD_SC_R,			// 0 0100
+	HID_KEYBOARD_RU_R,			// 0 0100
+	HID_KEYBOARD_SC_C,			// 0 0101
+	HID_KEYBOARD_RU_K,			// 0 0101
+	HID_KEYBOARD_SC_X,			// 0 0110
+	HID_KEYBOARD_RU_X,			// 0 0110
+	HID_KEYBOARD_SC_G,			// 0 0111
+	HID_KEYBOARD_RU_G,			// 0 0111
+	HID_KEYBOARD_SC_N,			// 0 1000
+	HID_KEYBOARD_RU_N,			// 0 1000
+	HID_KEYBOARD_SC_K,			// 0 1001
+	HID_KEYBOARD_RU_CH,			// 0 1001
+	HID_KEYBOARD_SC_L,			// 0 1010
+	HID_KEYBOARD_RU_L,			// 0 1010
+	HID_KEYBOARD_SC_Z,			// 0 1011
+	HID_KEYBOARD_RU_Z,			// 0 1011
+	HID_KEYBOARD_SC_D,			// 0 1100
+	HID_KEYBOARD_RU_D,			// 0 1100
+	HID_KEYBOARD_SC_J,			// 0 1101
+	HID_KEYBOARD_RU_J,			// 0 1101
+	HID_KEYBOARD_SC_B,			// 0 1110
+	HID_KEYBOARD_RU_B,			// 0 1110
+	HID_KEYBOARD_SC_M,			// 0 1111
+	HID_KEYBOARD_RU_M,			// 0 1111
+	HID_KEYBOARD_SC_H,			// 1 0000
+	HID_KEYBOARD_RU_W,			// 1 0000
+	HID_KEYBOARD_SC_W,			// 1 0001
+	HID_KEYBOARD_RU_ZH,			// 1 0001
+	HID_KEYBOARD_SC_Q,			// 1 0010
+	HID_KEYBOARD_RU_C,			// 1 0010
+	0,							// 1 0011 ???
+	0,							// 1 0011 ???
+	HID_KEYBOARD_SC_V,			// 1 0100
+	HID_KEYBOARD_RU_SH,			// 1 0100
+	HID_KEYBOARD_SC_LEFT_SHIFT,	// 1 0101
+	HID_KEYBOARD_SC_LEFT_SHIFT,	// 1 0101
+	0,							// 1 0110 ()
+	0,							// 1 0110 ()
+	0,							// 1 0111 ???
+	0,							// 1 0111 ???
+	HID_KEYBOARD_SC_F,			// 1 1000
+	HID_KEYBOARD_RU_SCH,		// 1 1000
+	0,							// 1 1001 %#
+	0,							// 1 1001 %№
+	HID_KEYBOARD_SC_Y,			// 1 1010
+	HID_KEYBOARD_RU_F,			// 1 1010
+	0,							// 1 1011
+	HID_KEYBOARD_RU_YE,			// 1 1011
+	0,							// 1 1100 ???
+	0,							// 1 1100 ???
+	0,							// 1 1101 ???
+	0,							// 1 1101 ???
+	0,							// 1 1110 ???
+	HID_KEYBOARD_RU_HARD_SIGN,	// 1 1110
+	0,							// 1 1111 .,
+	0,							// 1 1111 .,
 };
 
 #define KM_MACROS		1
@@ -320,8 +323,8 @@ const uint8_t Layer_Sym[3][36] PROGMEM = {
 	{
 		HID_KEYBOARD_SC_DOT_AND_GREATER_THAN_SIGN,	KM_SHIFT0,			// 00 00 0 .
 		HID_KEYBOARD_SC_SLASH_AND_QUESTION_MARK,	KM_SHIFT0,			// 00 00 0 .
-		HID_KEYBOARD_SC_COMMA_AND_LESS_THAN_SIGN,	KM_SHIFT0,			// 00 00 1 ,
-		HID_KEYBOARD_SC_SLASH_AND_QUESTION_MARK,	KM_SHIFT1,			// 00 00 1 ,
+		HID_KEYBOARD_SC_COMMA_AND_LESS_THAN_SIGN,	KM_SHIFT0,			// 00 00 1 
+		HID_KEYBOARD_SC_SLASH_AND_QUESTION_MARK,	KM_SHIFT1,			// 00 00 1 
 		HID_KEYBOARD_SC_SEMICOLON_AND_COLON,		KM_SHIFT1,			// 00 01 2 :
 		HID_KEYBOARD_SC_6_AND_CARET,				KM_SHIFT1,			// 00 01 2 :
 		HID_KEYBOARD_SC_1_AND_EXCLAMATION,			KM_SHIFT1,			// 00 01 3 !
@@ -350,8 +353,8 @@ const uint8_t Layer_Sym[3][36] PROGMEM = {
 		HID_KEYBOARD_SC_COMMA_AND_LESS_THAN_SIGN,			KM_LAY_SHIFT1,	// 01 01 <
 		HID_KEYBOARD_SC_DOT_AND_GREATER_THAN_SIGN,			KM_SHIFT1,		// 01 10 >
 		HID_KEYBOARD_SC_DOT_AND_GREATER_THAN_SIGN,			KM_LAY_SHIFT1,	// 01 10 >
-		0, 0,	// 11 00 ???
-		0, 0,	// 11 00 ???
+		0, 0,																// 11 00 ???
+		0, 0,																// 11 00 ???
 		HID_KEYBOARD_SC_OPENING_BRACKET_AND_OPENING_BRACE,	KM_SHIFT1,		// 11 01 {
 		HID_KEYBOARD_SC_OPENING_BRACKET_AND_OPENING_BRACE,	KM_LAY_SHIFT1,	// 11 01 {
 		HID_KEYBOARD_SC_CLOSING_BRACKET_AND_CLOSING_BRACE,	KM_SHIFT1,		// 11 10 }
@@ -362,20 +365,20 @@ const uint8_t Layer_Sym[3][36] PROGMEM = {
 		HID_KEYBOARD_SC_5_AND_PERCENTAGE,	KM_SHIFT1,			// 00 00 0 %
 		HID_KEYBOARD_SC_3_AND_HASHMARK,		KM_SHIFT1,			// 00 00 1 #
 		HID_KEYBOARD_SC_3_AND_HASHMARK,		KM_LAY_SHIFT1,		// 00 00 1 #
-		0, 0,	// 00 01 ~
-		0, 0,	// 00 01 ~
-		0, 0,	// 00 10 №
-		0, 0,	// 00 10 №
-		0, 0,	// 01 01 $
-		0, 0,	// 01 01 $
-		0, 0,	// 01 10 ^
-		0, 0,	// 01 10 ^
-		HID_KEYBOARD_SC_3_AND_HASHMARK,		KM_LAY_SHIFT1,		// 11 00 @
-		HID_KEYBOARD_SC_3_AND_HASHMARK,		KM_SHIFT1,			// 11 00 @
-		0, 0,	// 11 01 \\
-		0, 0,	// 11 01 \\
-		0, 0,	// 11 10 |
-		0, 0,	// 11 10 |
+		HID_KEYBOARD_SC_GRAVE_ACCENT_AND_TILDE,	KM_SHIFT1,		// 00 01 ~
+		HID_KEYBOARD_SC_GRAVE_ACCENT_AND_TILDE,	KM_LAY_SHIFT1,	// 00 01 ~
+		HID_KEYBOARD_SC_3_AND_HASHMARK, 	KM_LAY_SHIFT1,		// 00 10 №
+		HID_KEYBOARD_SC_3_AND_HASHMARK,		KM_SHIFT1,			// 00 10 №
+		HID_KEYBOARD_SC_4_AND_DOLLAR, 		KM_SHIFT1,			// 01 01 $
+		HID_KEYBOARD_SC_4_AND_DOLLAR,		KM_LAY_SHIFT1,		// 01 01 $
+		HID_KEYBOARD_SC_6_AND_CARET,		KM_SHIFT1,			// 01 10 ^
+		HID_KEYBOARD_SC_6_AND_CARET, 		KM_LAY_SHIFT1,		// 01 10 ^
+		HID_KEYBOARD_SC_2_AND_AT,			KM_SHIFT1,			// 11 00 @
+		HID_KEYBOARD_SC_2_AND_AT,			KM_LAY_SHIFT1,		// 11 00 @
+		HID_KEYBOARD_SC_BACKSLASH_AND_PIPE,	KM_SHIFT0,			// 11 01 
+		HID_KEYBOARD_SC_BACKSLASH_AND_PIPE, KM_SHIFT0,			// 11 01 
+		HID_KEYBOARD_SC_BACKSLASH_AND_PIPE, KM_SHIFT1,			// 11 10 |
+		HID_KEYBOARD_SC_BACKSLASH_AND_PIPE, KM_LAY_SHIFT1,		// 11 10 |
 	}
 };
 
@@ -520,24 +523,16 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 		USB_KeyboardReport_Data_t* KeyboardReport = (USB_KeyboardReport_Data_t*)ReportData;
 
 		//uint8_t usedKeyCodes = 0;
-
-		if (Macros_Buffer[0] || Macros_Buffer[1]) {
-			if (Macros_Buffer[0] != Buffer_Last) {
-				KeyboardReport->KeyCode[0] = (Macros_Buffer[0] == 0xFF ? 0 : Macros_Buffer[0]);
-				KeyboardReport->Modifier = Macros_Buffer[1];
-				Buffer_Last = KeyboardReport->KeyCode[0];
-				for (uint8_t i = 0; i < (MACROS_BUFFER_SIZE - 2); i+=2) {
-					Macros_Buffer[i + 0] = Macros_Buffer[i + 2];
-					Macros_Buffer[i + 1] = Macros_Buffer[i + 3];
-					if (! Macros_Buffer[i + 0] && ! Macros_Buffer[i + 1]) break;
-				}
-				Macros_Buffer[MACROS_BUFFER_SIZE - 1] = 0;
-				Macros_Buffer[MACROS_BUFFER_SIZE - 2] = 0;
-			} else {
-				Buffer_Last = 0xFF;
-				KeyboardReport->Modifier = Q_Mods;
+		if (Time_Tick > 0) {
+			Time_Tick++;
+			if (Time_Tick >= 500) {
+				Time_Tick = 0;
 			}
-		} else {
+		}
+
+		if (! (Macros_Buffer[0] || Macros_Buffer[1])) {
+
+
 			uint8_t mods = Q_Mods;
 			KeyboardReport->Modifier = mods;
 
@@ -548,11 +543,26 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 			if ((Chords[0] & 0x300) != 0x200 && (Chords[1] & 0x300) != 0x200) {
 				Q_Mods = 0;
 			}
+			bool isRelease = Chords[0] < chords[0] || Chords[1] < chords[1];
+			bool isPress = Chords[0] > chords[0] || Chords[1] > chords[1];
+			bool isTick = Time_Tick > Chord_Tick && Chords[0] == Chords_Last[0] && Chords[1] == Chords_Last[1];
+			if (isTick) {
+				Time_Tick--;
+			}
 			for (uint8_t side=0; side<=1; side++) {
-				uint16_t chord2 = chords[side]; 
-				if (Chords[0] < chords[0] || Chords[1] < chords[1]) {
+				uint16_t chord2 = chords[side];
+				if (isPress) {
+					if (side) Chord_Growing = true;
+					Time_Tick = 1;
+				} else if (isRelease || isTick) {
 					if (Chord_Growing) {
-						if (side) Chord_Growing = false;
+						if (side && isRelease) {
+							Chord_Tick = Time_Tick + Time_Tick / 2;
+							Chords_Last[0] = chords[0];
+							Chords_Last[1] = chords[1];
+							Time_Tick = 0;
+						}
+						if (side && ! isTick) Chord_Growing = false;
 
 						if (chord2 == 0x200 || chord2 == 0x80) { // Layer change
 							uint8_t newLayer = LAYER1;
@@ -591,6 +601,8 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 								if (chord == 0x41) { // 2 Backspaces
 									Macros_Buffer[j++] = HID_KEYBOARD_SC_BACKSPACE;
 									Macros_Buffer[j++] = 0;
+									Macros_Buffer[j++] = 0xFF;
+									Macros_Buffer[j++] = 0;
 									Macros_Buffer[j++] = HID_KEYBOARD_SC_BACKSPACE;
 									Macros_Buffer[j++] = 0;
 								} else if (chord == 0x45) { // Ctrl+Backspace
@@ -599,16 +611,26 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 								} else if (chord == 0x51) { // 3 Backspaces
 									Macros_Buffer[j++] = HID_KEYBOARD_SC_BACKSPACE;
 									Macros_Buffer[j++] = 0;
+									Macros_Buffer[j++] = 0xFF;
+									Macros_Buffer[j++] = 0;
 									Macros_Buffer[j++] = HID_KEYBOARD_SC_BACKSPACE;
+									Macros_Buffer[j++] = 0;
+									Macros_Buffer[j++] = 0xFF;
 									Macros_Buffer[j++] = 0;
 									Macros_Buffer[j++] = HID_KEYBOARD_SC_BACKSPACE;
 									Macros_Buffer[j++] = 0;
 								} else if (chord == 0x55) { // 4 Backspaces
 									Macros_Buffer[j++] = HID_KEYBOARD_SC_BACKSPACE;
 									Macros_Buffer[j++] = 0;
-									Macros_Buffer[j++] = HID_KEYBOARD_SC_BACKSPACE;
+									Macros_Buffer[j++] = 0xFF;
 									Macros_Buffer[j++] = 0;
 									Macros_Buffer[j++] = HID_KEYBOARD_SC_BACKSPACE;
+									Macros_Buffer[j++] = 0;
+									Macros_Buffer[j++] = 0xFF;
+									Macros_Buffer[j++] = 0;
+									Macros_Buffer[j++] = HID_KEYBOARD_SC_BACKSPACE;
+									Macros_Buffer[j++] = 0;
+									Macros_Buffer[j++] = 0xFF;
 									Macros_Buffer[j++] = 0;
 									Macros_Buffer[j++] = HID_KEYBOARD_SC_BACKSPACE;
 									Macros_Buffer[j++] = 0;
@@ -647,30 +669,34 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 							} else if ((chord & 0x3) && ! (chord & 0x3C) && (chord & 0x80)) { // Mods+Vowels
 								uint8_t keyCode;
 								if ((chord & 0xC0) == 0x80) { // Ctrl+[IOAY]
-									keyCode = pgm_read_byte(&Layer_Vowels[0][(chord & 0x3) - 1]);
+									keyCode = pgm_read_byte(&Layer_Vowels[((chord & 0x3) - 1) << 1]);
 								} else if (chord == 0xC1) { // Ctrl+H
-									keyCode = pgm_read_byte(&Layer_Consonants[0][0b10000 - 1]);
+									keyCode = pgm_read_byte(&Layer_Consonants[(0b10000 - 1) << 1]);
 								} else if (chord == 0xC2) { // Ctrl+U
-									keyCode = pgm_read_byte(&Layer_Vowels[0][0b0110 - 1]);
+									keyCode = pgm_read_byte(&Layer_Vowels[(0b0110 - 1) << 1]);
 								} else if (chord == 0xC3) { // Ctrl+E
-									keyCode = pgm_read_byte(&Layer_Vowels[0][0b1000 - 1]);
+									keyCode = pgm_read_byte(&Layer_Vowels[(0b1000 - 1) << 1]);
 								}
 								if (keyCode) {
 									if (! (mods & ~HID_KEYBOARD_MODIFIER_LEFTSHIFT)) {
 										mods = HID_KEYBOARD_MODIFIER_LEFTCTRL;
-										Q_Mods = 0;
 									}
+									Q_Mods = 0;
 									Macros_Buffer[j++] = keyCode;
+									Macros_Buffer[j++] = mods;
+									Macros_Buffer[j++] = 0;
 									Macros_Buffer[j++] = mods;
 								}
 							} else if (! (chord & 0x3) && (chord & 0xC0) && (chord & 0x7C)) { // Mods+Consonants
-								uint8_t keyCode = pgm_read_byte(&Layer_Consonants[0][((chord >> 2) & 0x1F) - 1]);
+								uint8_t keyCode = pgm_read_byte(&Layer_Consonants[(((chord >> 2) & 0x1F) - 1) << 1]);
 								if (keyCode) {
 									if (! (mods & ~HID_KEYBOARD_MODIFIER_LEFTSHIFT)) {
 										mods = HID_KEYBOARD_MODIFIER_LEFTCTRL;
-										Q_Mods = 0;
 									}
+									Q_Mods = 0;
 									Macros_Buffer[j++] = keyCode;
+									Macros_Buffer[j++] = mods;
+									Macros_Buffer[j++] = 0;
 									Macros_Buffer[j++] = mods;
 								}
 							} else if (Q_Nav == NAV_MODE) { // Nav
@@ -717,6 +743,11 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 										Q_Mods = 0;
 										Macros_Buffer[j++] = HID_KEYBOARD_SC_DELETE;
 										Macros_Buffer[j++] = mods;
+									} else if (chord == 0x35) { // Ctrl+Alt
+										mods = HID_KEYBOARD_MODIFIER_LEFTCTRL | HID_KEYBOARD_MODIFIER_LEFTALT;
+										Q_Mods = mods;
+										Macros_Buffer[j++] = 0;
+										Macros_Buffer[j++] = mods;
 									}
 								} else {
 									if (keyCode >= HID_KEYBOARD_SC_LEFT_CONTROL && keyCode <= HID_KEYBOARD_SC_RIGHT_GUI) {
@@ -747,14 +778,22 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 							} else if (chord2 == 0x1D4) { // 4 Spaces
 								Macros_Buffer[j++] = HID_KEYBOARD_SC_SPACE;
 								Macros_Buffer[j++] = 0;
-								Macros_Buffer[j++] = HID_KEYBOARD_SC_SPACE;
+								Macros_Buffer[j++] = 0xFF;
 								Macros_Buffer[j++] = 0;
 								Macros_Buffer[j++] = HID_KEYBOARD_SC_SPACE;
+								Macros_Buffer[j++] = 0;
+								Macros_Buffer[j++] = 0xFF;
+								Macros_Buffer[j++] = 0;
+								Macros_Buffer[j++] = HID_KEYBOARD_SC_SPACE;
+								Macros_Buffer[j++] = 0;
+								Macros_Buffer[j++] = 0xFF;
 								Macros_Buffer[j++] = 0;
 								Macros_Buffer[j++] = HID_KEYBOARD_SC_SPACE;
 								Macros_Buffer[j++] = 0;
 							} else if (chord2 == 0x180) { // 2 Spaces
 								Macros_Buffer[j++] = HID_KEYBOARD_SC_SPACE;
+								Macros_Buffer[j++] = 0;
+								Macros_Buffer[j++] = 0xFF;
 								Macros_Buffer[j++] = 0;
 								Macros_Buffer[j++] = HID_KEYBOARD_SC_SPACE;
 								Macros_Buffer[j++] = 0;
@@ -762,11 +801,14 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 								if (isConsonants) { // Consonants
 									uint8_t chord = chord2;
 									chord = (chord >> 2) & ~0x20;
-									uint8_t keyCode = pgm_read_byte(&Layer_Consonants[Layer_Current][chord - 1]);
+									uint8_t keyCode = pgm_read_byte(&Layer_Consonants[Layer_Current ? (chord << 1) - 1 : (chord << 1) - 2]);
 									if (keyCode) {
 										if (keyCode == HID_KEYBOARD_SC_LEFT_SHIFT) {
 											mods = HID_KEYBOARD_MODIFIER_LEFTSHIFT;
 										} else {
+											if (isCShift && ! (chord2 & 0x203)) { // CShift
+												mods = HID_KEYBOARD_MODIFIER_LEFTSHIFT;
+											}
 											Macros_Buffer[j++] = keyCode;
 											Macros_Buffer[j++] = mods;
 										}
@@ -782,7 +824,7 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 										if (symLayer) {
 											uint8_t sym = 0;
 											const uint16_t chord1 = chord2 & 0x303;
-											if (chord1 == 0 && ! isCShift) sym = 1;
+											if (chord1 == 0 && isCShift) sym = 1;
 											else if (chord1 == 0x1) sym = 2;
 											else if (chord1 == 0x2) sym = 3;
 											else if (chord1 == 0x101) sym = 4;
@@ -790,27 +832,36 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 											else if (chord1 == 0x300) sym = 6;
 											else if (chord1 == 0x301) sym = 7;
 											else if (chord1 == 0x302) sym = 8;
-
 											sym = sym << 2; // * 4
 											if (Layer_Current == LAYER2) {
 												sym += 2;
 											}
 											uint8_t keyCode = pgm_read_byte(&Layer_Sym[symLayer - 1][sym]);
 											uint8_t keyMode = pgm_read_byte(&Layer_Sym[symLayer - 1][sym + 1]);
-											
+
 											if (keyMode == KM_SHIFT0) {
+												mods = 0;
 												Macros_Buffer[j++] = keyCode;
-												Macros_Buffer[j++] = 0;
+												Macros_Buffer[j++] = mods;
 											} else if (keyMode == KM_SHIFT1) {
+												mods = HID_KEYBOARD_MODIFIER_LEFTSHIFT;
 												Macros_Buffer[j++] = keyCode;
-												Macros_Buffer[j++] = HID_KEYBOARD_MODIFIER_LEFTSHIFT;
+												Macros_Buffer[j++] = mods;
 											} else if (keyMode == KM_LAY_SHIFT0 || keyMode == KM_LAY_SHIFT1) {
 												mods = 0;
 												Macros_Buffer[j++] = 0xFF;
 												Macros_Buffer[j++] = 0;
 
-												Macros_Buffer[j++] = 0;
-												Macros_Buffer[j++] = HID_KEYBOARD_MODIFIER_LEFTSHIFT | HID_KEYBOARD_MODIFIER_LEFTALT;
+												if (OS_Mode == OS_WINDOWS) { // Ctrl+Shift
+													Macros_Buffer[j++] = 0;
+													Macros_Buffer[j++] = HID_KEYBOARD_MODIFIER_LEFTSHIFT | HID_KEYBOARD_MODIFIER_LEFTCTRL;
+												} else if (OS_Mode == OS_MAC) { // Cmd+Space
+													Macros_Buffer[j++] = HID_KEYBOARD_SC_SPACE;
+													Macros_Buffer[j++] = HID_KEYBOARD_MODIFIER_LEFTGUI;
+												} else { // Alt+Shift
+													Macros_Buffer[j++] = 0;
+													Macros_Buffer[j++] = HID_KEYBOARD_MODIFIER_LEFTSHIFT | HID_KEYBOARD_MODIFIER_LEFTALT;
+												}
 
 												Macros_Buffer[j++] = 0xFF;
 												Macros_Buffer[j++] = 0;
@@ -821,8 +872,16 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 												Macros_Buffer[j++] = 0xFF;
 												Macros_Buffer[j++] = 0;
 
-												Macros_Buffer[j++] = 0;
-												Macros_Buffer[j++] = HID_KEYBOARD_MODIFIER_LEFTSHIFT | HID_KEYBOARD_MODIFIER_LEFTALT;
+												if (OS_Mode == OS_WINDOWS) { // Ctrl+Shift
+													Macros_Buffer[j++] = 0;
+													Macros_Buffer[j++] = HID_KEYBOARD_MODIFIER_LEFTSHIFT | HID_KEYBOARD_MODIFIER_LEFTCTRL;
+												} else if (OS_Mode == OS_MAC) { // Cmd+Space
+													Macros_Buffer[j++] = HID_KEYBOARD_SC_SPACE;
+													Macros_Buffer[j++] = HID_KEYBOARD_MODIFIER_LEFTGUI;
+												} else { // Alt+Shift
+													Macros_Buffer[j++] = 0;
+													Macros_Buffer[j++] = HID_KEYBOARD_MODIFIER_LEFTSHIFT | HID_KEYBOARD_MODIFIER_LEFTALT;
+												}
 
 												Macros_Buffer[j++] = 0xFF;
 												Macros_Buffer[j++] = 0;
@@ -836,16 +895,13 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 											isCShift = 0;
 										}
 									}
-									if (isCShift && ! (chord2 & 0x203)) { // CShift
-										mods = HID_KEYBOARD_MODIFIER_LEFTSHIFT;
-									}
 								}
 								if (isVowels) { // Vowels
 									uint8_t chord = (chord2 & 0x3) | ((chord2 & 0x300) >> 6);
 									if ((chord & 0xC) == 0xC) {
 										chord = chord & 0xB;
 									}
-									uint8_t keyCode = pgm_read_byte(&Layer_Vowels[Layer_Current][chord - 1]);
+									uint8_t keyCode = pgm_read_byte(&Layer_Vowels[Layer_Current ? (chord << 1) - 1 : (chord << 1) - 2]);
 									if (! keyCode && Layer_Current == LAYER1) {
 										if (chord == 0b00001010) { // ou
 											Macros_Buffer[j++] = HID_KEYBOARD_SC_O;
@@ -881,40 +937,23 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 							}
 						}
 					}
-				} else if (Chords[0] > chords[0] || Chords[1] > chords[1]) {
-					if (side) Chord_Growing = true;
 				}
 			}
 
-			//Macros_Buffer[1] = mods;
-			//KeyboardReport->Modifier = mods;
-
-			/*KeyboardReport->Modifier |= mods;
-			if (clearShift) {
-				KeyboardReport->Modifier &= ~(HID_KEYBOARD_MODIFIER_LEFTSHIFT | HID_KEYBOARD_MODIFIER_RIGHTSHIFT);
+		}
+		if (Macros_Buffer[0] || Macros_Buffer[1]) {
+			if (Repeat_Mode == REPEAT_KBD && Time_Tick >= Chord_Tick) {
+				Time_Tick = Time_Tick - Time_Tick / 8;
 			}
-			if (setShift && !(KeyboardReport->Modifier & (HID_KEYBOARD_MODIFIER_LEFTSHIFT | HID_KEYBOARD_MODIFIER_RIGHTSHIFT))) {
-				KeyboardReport->Modifier |= HID_KEYBOARD_MODIFIER_LEFTSHIFT;
-			}*/
-
-			/*if (usedKeyCodes > 1) {
-				uint8_t j = 0;
-				for (uint8_t i = 1; i < usedKeyCodes; i++) {
-					if (j < (MACROS_BUFFER_SIZE - 2)) {
-						if (KeyboardReport->KeyCode[i] == KeyboardReport->KeyCode[i - 1]) {
-							Macros_Buffer[j++] = 0xFF;
-							Macros_Buffer[j++] = 0;
-						}
-					}
-					if (j < (MACROS_BUFFER_SIZE - 2)) {
-						Macros_Buffer[j++] = KeyboardReport->KeyCode[i];
-						Macros_Buffer[j++] = 0;
-					}
-				}
-				for (uint8_t i = 1; i < usedKeyCodes; i++) {
-					KeyboardReport->KeyCode[i] = 0;
-				}
-			}*/
+			KeyboardReport->KeyCode[0] = (Macros_Buffer[0] == 0xFF ? 0 : Macros_Buffer[0]);
+			KeyboardReport->Modifier = Macros_Buffer[1];
+			for (uint8_t i = 0; i < (MACROS_BUFFER_SIZE - 2); i+=2) {
+				Macros_Buffer[i + 0] = Macros_Buffer[i + 2];
+				Macros_Buffer[i + 1] = Macros_Buffer[i + 3];
+				if (! Macros_Buffer[i + 0] && ! Macros_Buffer[i + 1]) break;
+			}
+			Macros_Buffer[MACROS_BUFFER_SIZE - 1] = 0;
+			Macros_Buffer[MACROS_BUFFER_SIZE - 2] = 0;
 		}
 
 		*ReportSize = sizeof(USB_KeyboardReport_Data_t);
@@ -982,7 +1021,7 @@ void CALLBACK_HID_Device_ProcessHIDReport(USB_ClassInfo_HID_Device_t* const HIDI
 int main(void) {
 	Hardware_Setup();
 	GlobalInterruptEnable();
-	Settings_Get();
+	//Settings_Get();
 	while (true) {
 		HID_Device_USBTask(&Keyboard_HID_Interface);
 		HID_Device_USBTask(&Mouse_HID_Interface);
