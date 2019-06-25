@@ -1,6 +1,13 @@
 TARGET       = kl23
+
 MCU          = at90usb162
 BOARD        = MICROSIN162
+#MCU          = atmega32u4
+#BOARD        = LEONARDO
+
+AVRDUDE_PORT = /dev/ttyACM0
+AVRDUDE_PROGRAMMER = avr109
+
 ARCH         = AVR8
 F_CPU        = 16000000
 F_USB        = $(F_CPU)

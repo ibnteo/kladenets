@@ -1,10 +1,21 @@
+/*
+C2     C4  Rows
+D0     C5    Cols
+D1     C6    Cols
+D4     B4  Rows
+D5     B3    Cols
+B0     B2    Cols
+
+B1  Rows
+*/
+
 void Ports_Init() {
 
 	// Init cols
 	DDRB  |= 0b00001101; // B0,B2,B3
 	PORTB |= 0b00001101;
-	DDRC  |= 0b01110000; // C4,C5,C6
-	PORTC |= 0b01110000;
+	DDRC  |= 0b01100000; // C5,C6
+	PORTC |= 0b01100000;
 	DDRD  |= 0b01100011; // D0,D1,D5, D6(Led)
 	PORTD |= 0b01100011; // + LED Off
 

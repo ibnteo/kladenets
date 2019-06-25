@@ -18,8 +18,11 @@
 #include <LUFA/Drivers/USB/USB.h>
 
 uint16_t Chords[2] = {0, 0};
-#include "microsin162.c" // Ports_Init(), LEDs(), Keyboard_Scan()
-//#include "catboard2.c" // Ports_Init(), LEDs(), Keyboard_Scan()
+
+// Ports_Init(), LEDs(), Keyboard_Scan()
+#include "microsin162.c"
+//#include "catboard2.c"
+//#include "promicro.c"
 
 #define LAYER1 0
 #define LAYER2 1
@@ -536,7 +539,7 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 			uint8_t mods = Q_Mods;
 			KeyboardReport->Modifier = mods;
 
-			const uint16_t chords[2] = {Chords[0], Chords[1]};
+			uint16_t chords[2] = {Chords[0], Chords[1]};
 			Keyboard_Scan();
 
 			uint8_t j = 0;
@@ -549,15 +552,25 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 			if (isTick) {
 				Time_Tick--;
 			}
+			/*if (Time_Tick > 100) {
+				chords[0] = Chords[0];
+				chords[1] = Chords[1];
+				isTick = true;
+			}*/
 			for (uint8_t side=0; side<=1; side++) {
 				uint16_t chord2 = chords[side];
+				uint16_t chord21 = chords[side ? 0 : 1];
 				if (isPress) {
 					if (side) Chord_Growing = true;
 					Time_Tick = 1;
 				} else if (isRelease || isTick) {
 					if (Chord_Growing) {
 						if (side && isRelease) {
-							Chord_Tick = Time_Tick + Time_Tick / 2;
+							//if (Time_Tick > 100) {
+							//	Chord_Tick = 10;
+							//} else {
+								Chord_Tick = Time_Tick + Time_Tick / 2;
+							//}
 							Chords_Last[0] = chords[0];
 							Chords_Last[1] = chords[1];
 							Time_Tick = 0;
@@ -703,56 +716,62 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 								uint8_t keyCode = pgm_read_byte(&Layer_NavMou[(chord & 0x3F) - 1]);
 								if (! keyCode) {
 									// TODO: Mou, Mods
+									/*uint8_t keyCodeMod1 = pgm_read_byte(&Layer_NavMou[(chord & 0x15) - 1]);
+									uint8_t keyCodeMod2 = pgm_read_byte(&Layer_NavMou[(chord & 0x2A) - 1]);
+									bool isMod1 = ! (chord & 0xC0) && keyCodeMod1 >= HID_KEYBOARD_SC_LEFT_CONTROL && keyCodeMod1 <= HID_KEYBOARD_SC_RIGHT_GUI;
+									bool isMod2 = ! (chord & 0xC0) && keyCodeMod2 >= HID_KEYBOARD_SC_LEFT_CONTROL && keyCodeMod2 <= HID_KEYBOARD_SC_RIGHT_GUI;
+									if ((isMod1 && isMod2)) {
+										uint8_t mods1 = 1 << (keyCodeMod1 - HID_KEYBOARD_SC_LEFT_CONTROL);
+										uint8_t mods2 = 1 << (keyCodeMod2 - HID_KEYBOARD_SC_LEFT_CONTROL);
+										Macros_Buffer[j++] = 0;
+										Macros_Buffer[j++] = mods1 | mods2;
+										if (! chord21) Q_Mods = mods1 | mods2;
+									} else*/
 									if (chord == 0x2C) { // Alt+Tab
 										mods = HID_KEYBOARD_MODIFIER_LEFTALT;
-										Q_Mods = mods;
 										Macros_Buffer[j++] = HID_KEYBOARD_SC_TAB;
 										Macros_Buffer[j++] = mods;
+										Q_Mods = mods;
 									} else if (chord == 0x1C) { // Ctrl+Tab
 										mods = HID_KEYBOARD_MODIFIER_LEFTCTRL;
-										Q_Mods = mods;
 										Macros_Buffer[j++] = HID_KEYBOARD_SC_TAB;
 										Macros_Buffer[j++] = mods;
+										Q_Mods = mods;
 									} else if (chord == 0xE) { // Ctrl+PgUp
 										mods = HID_KEYBOARD_MODIFIER_LEFTCTRL;
-										Q_Mods = 0;
 										Macros_Buffer[j++] = HID_KEYBOARD_SC_PAGE_UP;
 										Macros_Buffer[j++] = mods;
+										Q_Mods = 0;
 									} else if (chord == 0xD) { // Ctrl+PgDn
 										mods = HID_KEYBOARD_MODIFIER_LEFTCTRL;
-										Q_Mods = 0;
 										Macros_Buffer[j++] = HID_KEYBOARD_SC_PAGE_DOWN;
 										Macros_Buffer[j++] = mods;
+										Q_Mods = 0;
 									} else if (chord == 0x1A) { // Ctrl+Ins
 										mods = HID_KEYBOARD_MODIFIER_LEFTCTRL;
-										Q_Mods = 0;
 										Macros_Buffer[j++] = HID_KEYBOARD_SC_INSERT;
 										Macros_Buffer[j++] = mods;
+										Q_Mods = 0;
 									} else if (chord == 0x3A) { // Shift+Ins
 										mods = HID_KEYBOARD_MODIFIER_LEFTSHIFT;
-										Q_Mods = 0;
 										Macros_Buffer[j++] = HID_KEYBOARD_SC_INSERT;
 										Macros_Buffer[j++] = mods;
+										Q_Mods = 0;
 									} else if (chord == 0x25) { // Ctrl+Del
 										mods = HID_KEYBOARD_MODIFIER_LEFTCTRL;
-										Q_Mods = 0;
 										Macros_Buffer[j++] = HID_KEYBOARD_SC_DELETE;
 										Macros_Buffer[j++] = mods;
+										Q_Mods = 0;
 									} else if (chord == 0x35) { // Shift+Del
 										mods = HID_KEYBOARD_MODIFIER_LEFTSHIFT;
-										Q_Mods = 0;
 										Macros_Buffer[j++] = HID_KEYBOARD_SC_DELETE;
 										Macros_Buffer[j++] = mods;
-									} else if (chord == 0x35) { // Ctrl+Alt
-										mods = HID_KEYBOARD_MODIFIER_LEFTCTRL | HID_KEYBOARD_MODIFIER_LEFTALT;
-										Q_Mods = mods;
-										Macros_Buffer[j++] = 0;
-										Macros_Buffer[j++] = mods;
+										Q_Mods = 0;
 									}
 								} else {
 									if (keyCode >= HID_KEYBOARD_SC_LEFT_CONTROL && keyCode <= HID_KEYBOARD_SC_RIGHT_GUI) {
 										mods ^= 1 << (keyCode - HID_KEYBOARD_SC_LEFT_CONTROL);
-										Q_Mods = mods;
+										if (! chord21) Q_Mods = mods;
 									} else {
 										if (side == 0 && keyCode == HID_KEYBOARD_SC_LEFT_ARROW) {
 											keyCode = HID_KEYBOARD_SC_RIGHT_ARROW;

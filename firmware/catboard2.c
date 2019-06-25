@@ -6,8 +6,6 @@ void Ports_Init() {
 	// Init cols
 	DDRB  |= 0b01001010; // B1,B3,B6
 	PORTB |= 0b01001010;
-	//DDRC  |= 0b00000000;
-	//PORTC |= 0b00000000;
 	DDRD  |= 0b01000100; // D2, D6(Led)
 	PORTD |= 0b01000100; // + LED Off
 
