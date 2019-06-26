@@ -1,7 +1,7 @@
 /*
 * Project: Chord keyboard Kladenets-23
-* Version: 0.9 (pre release)
-* Date: 2019-06-25
+* Version: 0.91 (pre release)
+* Date: 2019-06-26
 * Author: Vladimir Romanovich <ibnteo@gmail.com>
 * License: MIT
 * https://github.com/ibnteo/kladenets
@@ -326,8 +326,8 @@ const uint8_t Layer_Sym[3][36] PROGMEM = {
 	{
 		HID_KEYBOARD_SC_DOT_AND_GREATER_THAN_SIGN,	KM_SHIFT0,			// 00 00 0 .
 		HID_KEYBOARD_SC_SLASH_AND_QUESTION_MARK,	KM_SHIFT0,			// 00 00 0 .
-		HID_KEYBOARD_SC_COMMA_AND_LESS_THAN_SIGN,	KM_SHIFT0,			// 00 00 1 
-		HID_KEYBOARD_SC_SLASH_AND_QUESTION_MARK,	KM_SHIFT1,			// 00 00 1 
+		HID_KEYBOARD_SC_COMMA_AND_LESS_THAN_SIGN,	KM_SHIFT0,			// 00 00 1 ,
+		HID_KEYBOARD_SC_SLASH_AND_QUESTION_MARK,	KM_SHIFT1,			// 00 00 1 ,
 		HID_KEYBOARD_SC_SEMICOLON_AND_COLON,		KM_SHIFT1,			// 00 01 2 :
 		HID_KEYBOARD_SC_6_AND_CARET,				KM_SHIFT1,			// 00 01 2 :
 		HID_KEYBOARD_SC_1_AND_EXCLAMATION,			KM_SHIFT1,			// 00 01 3 !
@@ -604,8 +604,11 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 							if (chord == 0x80) { // Enter
 								Macros_Buffer[j++] = HID_KEYBOARD_SC_ENTER;
 								Macros_Buffer[j++] = mods;
-							} else if (chord == 0x40 || chord == 0x43) { // Backspace
+							} else if (chord == 0x40) { // Backspace
 								Macros_Buffer[j++] = HID_KEYBOARD_SC_BACKSPACE;
+								Macros_Buffer[j++] = mods;
+							} else if (chord == 0x43) { // Space
+								Macros_Buffer[j++] = HID_KEYBOARD_SC_SPACE;
 								Macros_Buffer[j++] = mods;
 							} else if (chord == 0xC0) { // Escape
 								Macros_Buffer[j++] = HID_KEYBOARD_SC_ESCAPE;
@@ -614,8 +617,8 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 								if (chord == 0x41) { // 2 Backspaces
 									Macros_Buffer[j++] = HID_KEYBOARD_SC_BACKSPACE;
 									Macros_Buffer[j++] = 0;
-									Macros_Buffer[j++] = 0xFF;
-									Macros_Buffer[j++] = 0;
+									//Macros_Buffer[j++] = 0xFF;
+									//Macros_Buffer[j++] = 0;
 									Macros_Buffer[j++] = HID_KEYBOARD_SC_BACKSPACE;
 									Macros_Buffer[j++] = 0;
 								} else if (chord == 0x45) { // Ctrl+Backspace
@@ -624,27 +627,27 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 								} else if (chord == 0x51) { // 3 Backspaces
 									Macros_Buffer[j++] = HID_KEYBOARD_SC_BACKSPACE;
 									Macros_Buffer[j++] = 0;
-									Macros_Buffer[j++] = 0xFF;
-									Macros_Buffer[j++] = 0;
+									//Macros_Buffer[j++] = 0xFF;
+									//Macros_Buffer[j++] = 0;
 									Macros_Buffer[j++] = HID_KEYBOARD_SC_BACKSPACE;
 									Macros_Buffer[j++] = 0;
-									Macros_Buffer[j++] = 0xFF;
-									Macros_Buffer[j++] = 0;
+									//Macros_Buffer[j++] = 0xFF;
+									//Macros_Buffer[j++] = 0;
 									Macros_Buffer[j++] = HID_KEYBOARD_SC_BACKSPACE;
 									Macros_Buffer[j++] = 0;
 								} else if (chord == 0x55) { // 4 Backspaces
 									Macros_Buffer[j++] = HID_KEYBOARD_SC_BACKSPACE;
 									Macros_Buffer[j++] = 0;
-									Macros_Buffer[j++] = 0xFF;
-									Macros_Buffer[j++] = 0;
+									//Macros_Buffer[j++] = 0xFF;
+									//Macros_Buffer[j++] = 0;
 									Macros_Buffer[j++] = HID_KEYBOARD_SC_BACKSPACE;
 									Macros_Buffer[j++] = 0;
-									Macros_Buffer[j++] = 0xFF;
-									Macros_Buffer[j++] = 0;
+									//Macros_Buffer[j++] = 0xFF;
+									//Macros_Buffer[j++] = 0;
 									Macros_Buffer[j++] = HID_KEYBOARD_SC_BACKSPACE;
 									Macros_Buffer[j++] = 0;
-									Macros_Buffer[j++] = 0xFF;
-									Macros_Buffer[j++] = 0;
+									//Macros_Buffer[j++] = 0xFF;
+									//Macros_Buffer[j++] = 0;
 									Macros_Buffer[j++] = HID_KEYBOARD_SC_BACKSPACE;
 									Macros_Buffer[j++] = 0;
 								}
@@ -797,23 +800,23 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 							} else if (chord2 == 0x1D4) { // 4 Spaces
 								Macros_Buffer[j++] = HID_KEYBOARD_SC_SPACE;
 								Macros_Buffer[j++] = 0;
-								Macros_Buffer[j++] = 0xFF;
-								Macros_Buffer[j++] = 0;
+								//Macros_Buffer[j++] = 0xFF;
+								//Macros_Buffer[j++] = 0;
 								Macros_Buffer[j++] = HID_KEYBOARD_SC_SPACE;
 								Macros_Buffer[j++] = 0;
-								Macros_Buffer[j++] = 0xFF;
-								Macros_Buffer[j++] = 0;
+								//Macros_Buffer[j++] = 0xFF;
+								//Macros_Buffer[j++] = 0;
 								Macros_Buffer[j++] = HID_KEYBOARD_SC_SPACE;
 								Macros_Buffer[j++] = 0;
-								Macros_Buffer[j++] = 0xFF;
-								Macros_Buffer[j++] = 0;
+								//Macros_Buffer[j++] = 0xFF;
+								//Macros_Buffer[j++] = 0;
 								Macros_Buffer[j++] = HID_KEYBOARD_SC_SPACE;
 								Macros_Buffer[j++] = 0;
 							} else if (chord2 == 0x180) { // 2 Spaces
 								Macros_Buffer[j++] = HID_KEYBOARD_SC_SPACE;
 								Macros_Buffer[j++] = 0;
-								Macros_Buffer[j++] = 0xFF;
-								Macros_Buffer[j++] = 0;
+								//Macros_Buffer[j++] = 0xFF;
+								//Macros_Buffer[j++] = 0;
 								Macros_Buffer[j++] = HID_KEYBOARD_SC_SPACE;
 								Macros_Buffer[j++] = 0;
 							} else { // Letters
@@ -831,7 +834,7 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 											Macros_Buffer[j++] = keyCode;
 											Macros_Buffer[j++] = mods;
 										}
-									} else {
+									} else { // Symbols
 										uint8_t symLayer = 0;
 										if (chord == 0x1F) {
 											symLayer = 1;
@@ -843,7 +846,7 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 										if (symLayer) {
 											uint8_t sym = 0;
 											const uint16_t chord1 = chord2 & 0x303;
-											if (chord1 == 0 && isCShift) sym = 1;
+											if ((chord1 == 0 || chord1 == 0x100) && isCShift) sym = 1;
 											else if (chord1 == 0x1) sym = 2;
 											else if (chord1 == 0x2) sym = 3;
 											else if (chord1 == 0x101) sym = 4;
@@ -907,6 +910,8 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 											} else if (keyMode == KM_MACROS) {
 											}
 											if (isVowels == 0x100 || (isCShift && isVowels)) {
+												Macros_Buffer[j++] = 0xFF;
+												Macros_Buffer[j++] = 0;
 												Macros_Buffer[j++] = HID_KEYBOARD_SC_SPACE;
 												Macros_Buffer[j++] = 0;
 											}
@@ -949,6 +954,8 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 										Macros_Buffer[j++] = mods;
 									}
 									if (isCShift) { // VSpace
+										Macros_Buffer[j++] = 0xFF;
+										Macros_Buffer[j++] = 0;
 										Macros_Buffer[j++] = HID_KEYBOARD_SC_SPACE;
 										Macros_Buffer[j++] = 0;
 									}
@@ -966,13 +973,17 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 			}
 			KeyboardReport->KeyCode[0] = (Macros_Buffer[0] == 0xFF ? 0 : Macros_Buffer[0]);
 			KeyboardReport->Modifier = Macros_Buffer[1];
-			for (uint8_t i = 0; i < (MACROS_BUFFER_SIZE - 2); i+=2) {
-				Macros_Buffer[i + 0] = Macros_Buffer[i + 2];
-				Macros_Buffer[i + 1] = Macros_Buffer[i + 3];
-				if (! Macros_Buffer[i + 0] && ! Macros_Buffer[i + 1]) break;
+			if (Macros_Buffer[0] == Macros_Buffer[2] && Macros_Buffer[2] != 0xFF) {
+				Macros_Buffer[0] = 0xFF;
+			} else {
+				for (uint8_t i = 0; i < (MACROS_BUFFER_SIZE - 2); i+=2) {
+					Macros_Buffer[i + 0] = Macros_Buffer[i + 2];
+					Macros_Buffer[i + 1] = Macros_Buffer[i + 3];
+					if (! Macros_Buffer[i + 0] && ! Macros_Buffer[i + 1]) break;
+				}
+				Macros_Buffer[MACROS_BUFFER_SIZE - 1] = 0;
+				Macros_Buffer[MACROS_BUFFER_SIZE - 2] = 0;
 			}
-			Macros_Buffer[MACROS_BUFFER_SIZE - 1] = 0;
-			Macros_Buffer[MACROS_BUFFER_SIZE - 2] = 0;
 		}
 
 		*ReportSize = sizeof(USB_KeyboardReport_Data_t);

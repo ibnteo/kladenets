@@ -221,7 +221,7 @@ const USB_Descriptor_String_t PROGMEM ProductString =
 {
 	.Header                 = {.Size = USB_STRING_LEN(11), .Type = DTYPE_String},
 
-	.UnicodeString          = L"Ladoshki 44"
+	.UnicodeString          = L"Kladenets23"
 };
 
 /** This function is called by the library when in device mode, and must be overridden (see library "USB Descriptors"
