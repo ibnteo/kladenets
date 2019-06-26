@@ -20,9 +20,10 @@
 uint16_t Chords[2] = {0, 0};
 
 // Ports_Init(), LEDs(), Keyboard_Scan()
-#include "microsin162.c"
-//#include "catboard2.c"
-//#include "promicro.c"
+#include "microsin162.h"
+//#include "catboard2.h"
+//#include "promicro.h"
+//#include "wakizashi.h"
 
 #define LAYER1 0
 #define LAYER2 1

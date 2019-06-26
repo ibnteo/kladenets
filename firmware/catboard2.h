@@ -31,6 +31,15 @@ void LED_Switch(bool on) {
 	if (on) LED_On(); else LED_Off();
 }
 
+void LED2_On() {
+}
+void LED2_Off() {
+}
+void LED2_Toggle() {
+}
+void LED2_Switch(bool on) {
+}
+
 void Keyboard_Scan() {
 	Chords[0] = 0;
 	Chords[1] = 0;

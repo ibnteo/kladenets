@@ -45,6 +45,18 @@ void LED_Switch(bool on) {
 	if (on) LED_On(); else LED_Off();
 }
 
+void LED2_On() {
+	PORTB &= ~(1<<0);
+}
+void LED2_Off() {
+	PORTB |= 1<<0;
+}
+void LED2_Toggle() {
+	PINB ^= 1<<0;
+}
+void LED2_Switch(bool on) {
+	if (on) LED2_On(); else LED2_Off();
+}
 
 void Keyboard_Scan() {
 	Chords[0] = 0;
