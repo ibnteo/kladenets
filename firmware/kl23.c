@@ -820,19 +820,21 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 								Macros_Buffer[j++] = HID_KEYBOARD_SC_SPACE;
 								Macros_Buffer[j++] = 0;
 							} else { // Letters
+								uint8_t modsV = 0;
+								uint8_t modsC = 0;
 								if (isConsonants) { // Consonants
 									uint8_t chord = chord2;
 									chord = (chord >> 2) & ~0x20;
 									uint8_t keyCode = pgm_read_byte(&Layer_Consonants[Layer_Current ? (chord << 1) - 1 : (chord << 1) - 2]);
 									if (keyCode) {
 										if (keyCode == HID_KEYBOARD_SC_LEFT_SHIFT) {
-											mods = HID_KEYBOARD_MODIFIER_LEFTSHIFT;
+											modsV = HID_KEYBOARD_MODIFIER_LEFTSHIFT;
 										} else {
 											if (isCShift && ! (chord2 & 0x203)) { // CShift
-												mods = HID_KEYBOARD_MODIFIER_LEFTSHIFT;
+												modsC = HID_KEYBOARD_MODIFIER_LEFTSHIFT;
 											}
 											Macros_Buffer[j++] = keyCode;
-											Macros_Buffer[j++] = mods;
+											Macros_Buffer[j++] = mods | modsC;
 										}
 									} else { // Symbols
 										uint8_t symLayer = 0;
@@ -951,7 +953,7 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 									}
 									if (keyCode) {
 										Macros_Buffer[j++] = keyCode;
-										Macros_Buffer[j++] = mods;
+										Macros_Buffer[j++] = mods | modsV;
 									}
 									if (isCShift) { // VSpace
 										Macros_Buffer[j++] = 0xFF;
