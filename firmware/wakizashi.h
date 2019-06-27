@@ -29,7 +29,7 @@ void LED_Off() {
 	PORTD |= 1<<5;
 }
 void LED_Toggle() {
-	PIND ^= 1<<5;
+	PORTD ^= 1<<5;
 }
 void LED_Switch(bool on) {
 	if (on) LED_On(); else LED_Off();
@@ -42,7 +42,7 @@ void LED2_Off() {
 	PORTB |= 1<<0;
 }
 void LED2_Toggle() {
-	PINB ^= 1<<0;
+	PORTB ^= 1<<0;
 }
 void LED2_Switch(bool on) {
 	if (on) LED2_On(); else LED2_Off();

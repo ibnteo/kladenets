@@ -35,7 +35,7 @@ void LED_Off() {
 	PORTD |= 1<<6;
 }
 void LED_Toggle() {
-	PIND ^= 1<<6;
+	PORTD ^= 1<<6;
 }
 void LED_Switch(bool on) {
 	if (on) LED_On(); else LED_Off();

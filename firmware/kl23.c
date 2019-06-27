@@ -1,6 +1,6 @@
 /*
 * Project: Chord keyboard Kladenets-23
-* Version: 0.93 (pre release)
+* Version: 0.94 (pre release)
 * Date: 2019-06-27
 * Author: Vladimir Romanovich <ibnteo@gmail.com>
 * License: MIT
@@ -61,24 +61,16 @@ uint8_t EE_OS_Mode EEMEM;
 
 uint8_t Meta = HID_KEYBOARD_MODIFIER_LEFTCTRL;
 
-//#define REPEAT_OS 0
-//#define REPEAT_KBD 1
+uint8_t Settings_Side = 0;
 
-//uint8_t Repeat_Mode = REPEAT_KBD;
-//uint8_t EE_Repeat_Mode EEMEM;
-
-void Settings_Get() {
+void Settings_Read() {
 	Layout_Mode = eeprom_read_byte(&EE_Layout_Mode);
 	OS_Mode = eeprom_read_byte(&EE_OS_Mode);
-	//Repeat_Mode = eeprom_read_byte(&EE_Repeat_Mode);
-	if (OS_Mode == OS_MAC) {
-		Meta = HID_KEYBOARD_MODIFIER_LEFTGUI;
-	}
+	Meta = (OS_Mode == OS_MAC) ? HID_KEYBOARD_MODIFIER_LEFTGUI : HID_KEYBOARD_MODIFIER_LEFTCTRL;
 }
-void Settings_Set() {
+void Settings_Write() {
 	eeprom_write_byte(&EE_Layout_Mode, Layout_Mode);
 	eeprom_write_byte(&EE_OS_Mode, OS_Mode);
-	//eeprom_write_byte(&EE_Repeat_Mode, Repeat_Mode);
 }
 
 void Layout_Switch() {
@@ -576,23 +568,37 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 					Time_Tick = 1;
 				} else if (isRelease || isTick) {
 					if (Chord_Growing) {
-						if (side && isRelease) {
-							Chord_Tick = Time_Tick + Time_Tick / 2;
-							Chords_Last[0] = chords[0];
-							Chords_Last[1] = chords[1];
-							Time_Tick = 0;
-						}
-						if (side && ! isTick) Chord_Growing = false;
 
-						if (Layout_Mode == LAYOUTS2 && (chord2 == 0x200 || chord2 == 0x80)) { // Layer change
-							uint8_t newLayer = LAYER1;
-							if (chord2 == 0x80) {
-								newLayer = LAYER2;
+						if (Settings_Side && (Settings_Side - 1) == side) { // Settings
+							Settings_Side = 0;
+							uint8_t chord = chord2;
+							if (! (chord2 & ~0x13F)) {
+								if (chord & 0x3) {
+									Layout_Mode = (chord & 0x3) - 1;
+								}
+								if (chord & 0x3C) {
+									OS_Mode = ((chord & 0x3C) >> 2) - 1;
+									Meta = (OS_Mode == OS_MAC) ? HID_KEYBOARD_MODIFIER_LEFTGUI : HID_KEYBOARD_MODIFIER_LEFTCTRL;
+								}
+								if ((chord2 & 0x100) && (chord2 & 0x37)) {
+									Settings_Write();
+								}
 							}
-							if (Layer_Current != newLayer) {
-								Layout_Switch();
-								Layer_Current = newLayer;
-								LED_Switch(newLayer == LAYER2);
+							LED_Toggle();
+						} else if ((Chords_Last[side] == 0x299 && chords[side] == 0x266) || (Chords_Last[side] == 0x266 && chords[side] == 0x299)) { // Settings
+							Settings_Side = side + 1;
+							LED_Toggle();
+						} else if (chord2 == 0x200 || chord2 == 0x80) { // Layer change
+							if (Layout_Mode == LAYOUTS2) {
+								uint8_t newLayer = LAYER1;
+								if (chord2 == 0x80) {
+									newLayer = LAYER2;
+								}
+								if (Layer_Current != newLayer) {
+									Layout_Switch();
+									Layer_Current = newLayer;
+									LED_Switch(newLayer == LAYER2);
+								}
 							}
 						} else if ((chord2 & 0x300) == 0x200) { // Quasi
 							uint8_t chord = chord2;
@@ -954,6 +960,13 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 								}
 							}
 						}
+						if (side && isRelease) {
+							Chord_Tick = Time_Tick + Time_Tick / 2;
+							Chords_Last[0] = chords[0];
+							Chords_Last[1] = chords[1];
+							Time_Tick = 0;
+						}
+						if (side && ! isTick) Chord_Growing = false;
 					}
 				}
 			}
@@ -1043,7 +1056,7 @@ void CALLBACK_HID_Device_ProcessHIDReport(USB_ClassInfo_HID_Device_t* const HIDI
 int main(void) {
 	Hardware_Setup();
 	GlobalInterruptEnable();
-	//Settings_Get(); // EEPROM
+	Settings_Read();
 	while (true) {
 		HID_Device_USBTask(&Keyboard_HID_Interface);
 		HID_Device_USBTask(&Mouse_HID_Interface);
