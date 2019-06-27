@@ -210,7 +210,7 @@ const USB_Descriptor_String_t PROGMEM ManufacturerString =
 {
 	.Header                 = {.Size = USB_STRING_LEN(6), .Type = DTYPE_String},
 
-	.UnicodeString          = L"ibnTeo"
+	.UnicodeString          = L"Klavrg"
 };
 
 /** Product descriptor string. This is a Unicode string containing the product's details in human readable form,
