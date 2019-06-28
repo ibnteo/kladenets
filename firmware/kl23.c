@@ -1,7 +1,7 @@
 /*
 * Project: Chord keyboard Kladenets-23
-* Version: 0.94 (pre release)
-* Date: 2019-06-27
+* Version: 0.97 (pre release)
+* Date: 2019-06-28
 * Author: Vladimir Romanovich <ibnteo@gmail.com>
 * License: MIT
 * https://github.com/ibnteo/kladenets
@@ -752,43 +752,11 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 									Macros_Buffer[Macros_Index++] = mods;
 								}
 							}
-						} else if (Q_Nav == MOU_MODE) { // Mou
-							uint8_t keyCode = pgm_read_byte(&Layer_NavMou[(chord & 0x3F) - 1]);
-							int8_t step = isTick ? 2 : 20;
-							if (Mou_Speed == MOU_PREC) step = 1;
-							if (keyCode >= HID_KEYBOARD_SC_LEFT_CONTROL && keyCode <= HID_KEYBOARD_SC_RIGHT_GUI) {
-								mods ^= 1 << (keyCode - HID_KEYBOARD_SC_LEFT_CONTROL);
-								if (! chord21) Q_Mods = mods;
-								Macros_Buffer[Macros_Index++] = 0;
-								Macros_Buffer[Macros_Index++] = mods;
-							} else if (chord == 0x1) {
-								Q_Nav = NAV_MODE;
-							} else if (chord == 0x10) {
-								Mou_Speed = (Mou_Speed == MOU_PREC) ? MOU_ROUG : MOU_PREC;
-							} else if ((chord == 0x2 && side) || (chord == 0x20 && ! side)) {
-								Mouse_X = -step;
-							} else if ((chord == 0x20 && side) || (chord == 0x2 && ! side)) {
-								Mouse_X = step;
-							} else if (chord == 0x4) {
-								Mouse_Y = -step;
-							} else if (chord == 0x8) {
-								Mouse_Y = step;
-							} else if (chord == 0x9) {
-								Mouse_W = -1;
-							} else if (chord == 0x6) {
-								Mouse_W = 1;
-							} else if (chord == 0x3) {
-								Mouse_Button = Mouse_Button & 0x1 ? 0 : 0x1;
-							} else if (chord == 0xC) {
-								Mouse_Button = Mouse_Button & 0x4 ? 0 : 0x4;
-							} else if (chord == 0x30) {
-								Mouse_Button = Mouse_Button & 0x2 ? 0 : 0x2;
-							}
-						} else if (Q_Nav == NAV_MODE) { // Nav
+						} else { // Nav Mou
 							uint8_t keyCode = pgm_read_byte(&Layer_NavMou[(chord & 0x3F) - 1]);
 							if (! keyCode) {
 								if (chord == 0x1) {
-									Q_Nav = MOU_MODE;
+									Q_Nav = (Q_Nav == NAV_MODE) ? MOU_MODE : NAV_MODE;
 								} else if (chord == 0x1E) { // Ctrl+Alt
 									mods = HID_KEYBOARD_MODIFIER_LEFTALT | HID_KEYBOARD_MODIFIER_LEFTCTRL;
 									Macros_Buffer[Macros_Index++] = 0;
@@ -849,8 +817,32 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 									} else if (side == 0 && keyCode == HID_KEYBOARD_SC_END) {
 										keyCode = HID_KEYBOARD_SC_HOME;
 									}
-									Macros_Buffer[Macros_Index++] = keyCode;
-									Macros_Buffer[Macros_Index++] = mods;
+									int8_t mouStep = isTick ? 2 : 20;
+									if (Mou_Speed == MOU_PREC) mouStep = 1;
+									if (Q_Nav == MOU_MODE && keyCode == HID_KEYBOARD_SC_LEFT_ARROW) {
+										Mouse_X = -mouStep;
+									} else if (Q_Nav == MOU_MODE && keyCode == HID_KEYBOARD_SC_RIGHT_ARROW) {
+										Mouse_X = mouStep;
+									} else if (Q_Nav == MOU_MODE && keyCode == HID_KEYBOARD_SC_UP_ARROW) {
+										Mouse_Y = -mouStep;
+									} else if (Q_Nav == MOU_MODE && keyCode == HID_KEYBOARD_SC_DOWN_ARROW) {
+										Mouse_Y = mouStep;
+									} else if (Q_Nav == MOU_MODE && keyCode == HID_KEYBOARD_SC_PAGE_DOWN) {
+										Mouse_W = -1;
+									} else if (Q_Nav == MOU_MODE && keyCode == HID_KEYBOARD_SC_PAGE_UP) {
+										Mouse_W = 1;
+									} else if (Q_Nav == MOU_MODE && ((keyCode == HID_KEYBOARD_SC_HOME && side == 1) || (keyCode == HID_KEYBOARD_SC_END && side == 0))) {
+										Mouse_Button = Mouse_Button & 0x1 ? 0 : 0x1;
+									} else if (Q_Nav == MOU_MODE && ((keyCode == HID_KEYBOARD_SC_HOME && side == 0) || (keyCode == HID_KEYBOARD_SC_END && side == 1))) {
+										Mouse_Button = Mouse_Button & 0x2 ? 0 : 0x2;
+									} else if (Q_Nav == MOU_MODE && keyCode == HID_KEYBOARD_SC_TAB) {
+										Mouse_Button = Mouse_Button & 0x4 ? 0 : 0x4;
+									} else if (Q_Nav == MOU_MODE && keyCode == HID_KEYBOARD_SC_DELETE) {
+										Mou_Speed = (Mou_Speed == MOU_PREC) ? MOU_ROUG : MOU_PREC;
+									} else {
+										Macros_Buffer[Macros_Index++] = keyCode;
+										Macros_Buffer[Macros_Index++] = mods;
+									}
 								}
 							}
 						}

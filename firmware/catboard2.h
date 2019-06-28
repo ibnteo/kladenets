@@ -40,87 +40,95 @@ void LED2_Toggle() {
 void LED2_Switch(bool on) {
 }
 
+void Chord_Set(uint8_t index, uint8_t bit, bool notset) {
+	if (notset) {
+		Chords[index] &= ~(1<<bit);
+	} else {
+		Chords[index] |= 1<<bit;
+	}
+}
+
+uint8_t Scan_Tick = 0;
 void Keyboard_Scan() {
-	Chords[0] = 0;
-	Chords[1] = 0;
-
-	PORTD &= ~(1<<2); // D2
-	_delay_us(1);
-	if (! (PINC & 1<<2)) Chords[0] |= 1<<0; // C2
-	if (! (PINB & 1<<0)) Chords[0] |= 1<<2; // B0
-	if (! (PIND & 1<<4)) Chords[0] |= 1<<4; // D4
-	if (! (PIND & 1<<0)) Chords[0] |= 1<<6; // D0
-	if (! (PINC & 1<<4)) Chords[1] |= 1<<0; // C4
-	if (! (PINB & 1<<2)) Chords[1] |= 1<<2; // B2
-	if (! (PINB & 1<<5)) Chords[1] |= 1<<4; // B5
-	if (! (PINC & 1<<7)) Chords[1] |= 1<<6; // C7
-	PORTD |= 1<<2;
-
-	PORTB &= ~(1<<6); // B6
-	_delay_us(1);
-	if (! (PINC & 1<<2)) Chords[0] |= 1<<1; // C2
-	if (! (PINB & 1<<0)) Chords[0] |= 1<<3; // B0
-	if (! (PIND & 1<<4)) Chords[0] |= 1<<5; // D4
-	if (! (PIND & 1<<0)) Chords[0] |= 1<<7; // D0
-	if (! (PINC & 1<<4)) Chords[1] |= 1<<1; // C4
-	if (! (PINB & 1<<2)) Chords[1] |= 1<<3; // B2
-	if (! (PINB & 1<<5)) Chords[1] |= 1<<5; // B5
-	if (! (PINC & 1<<7)) Chords[1] |= 1<<7; // C7
-	PORTB |= 1<<6;
-
-	PORTB &= ~(1<<1); // B1
-	_delay_us(1);
-	if (! (PINC & 1<<2)) Chords[0] |= 1<<9; // C2
-	if (! (PINB & 1<<0)) Chords[0] |= 1<<8; // B0
-	if (! (PINC & 1<<4)) Chords[1] |= 1<<9; // C4
-	if (! (PINB & 1<<2)) Chords[1] |= 1<<8; // B2
-	// Double thumb
-	if (! (PIND & 1<<5)) { // D5
-		Chords[0] |= 1<<9;
-		Chords[0] |= 1<<8;
+	if (Scan_Tick == 0) {
+		PORTD &= ~(1<<2); // D2
+	} else if (Scan_Tick == 1) {
+		Chord_Set(0, 0, PINC & 1<<2);
+		Chord_Set(0, 2, PINB & 1<<0);
+		Chord_Set(0, 4, PIND & 1<<4);
+		Chord_Set(0, 6, PIND & 1<<0);
+		Chord_Set(1, 0, PINC & 1<<4);
+		Chord_Set(1, 2, PINB & 1<<2);
+		Chord_Set(1, 4, PINB & 1<<5);
+		Chord_Set(1, 6, PINC & 1<<7);
+		PORTD |= 1<<2;
+		PORTB &= ~(1<<6); // B6
+	} else if (Scan_Tick == 2) {
+		Chord_Set(0, 1, PINC & 1<<2);
+		Chord_Set(0, 3, PINB & 1<<0);
+		Chord_Set(0, 5, PIND & 1<<4);
+		Chord_Set(0, 7, PIND & 1<<0);
+		Chord_Set(1, 1, PINC & 1<<4);
+		Chord_Set(1, 3, PINB & 1<<2);
+		Chord_Set(1, 5, PINB & 1<<5);
+		Chord_Set(1, 7, PINC & 1<<7);
+		PORTB |= 1<<6;
+		PORTB &= ~(1<<1); // B1
+	} else if (Scan_Tick == 3) {
+		Chord_Set(0, 9, PINC & 1<<2);
+		Chord_Set(0, 8, PINB & 1<<0);
+		Chord_Set(1, 9, PINC & 1<<4);
+		Chord_Set(1, 8, PINB & 1<<2);
+		PORTB |= 1<<1;
+		/*// Double thumb
+		if (! (PIND & 1<<5)) { // D5
+			Chords[0] |= 1<<9;
+			Chords[0] |= 1<<8;
+		}
+		if (! (PINB & 1<<4)) { // B4
+			Chords[1] |= 1<<9;
+			Chords[1] |= 1<<8;
+		}
+		if (! (PIND & 1<<4)) { // D4
+			Chords[0] |= 1<<6;
+			Chords[0] |= 1<<7;
+		}
+		if (! (PINB & 1<<5)) { // B5
+			Chords[1] |= 1<<6;
+			Chords[1] |= 1<<7;
+		}
+		PORTB |= 1<<1;
+		// Double fingers
+		PORTB &= ~(1<<3); // B3
+	} else if (Scan_Tick == 4) {
+		if (! (PINC & 1<<2)) { // C2
+			Chords[0] |= 1<<0;
+			Chords[0] |= 1<<1;
+		}
+		if (! (PINB & 1<<0)) { // B0
+			Chords[0] |= 1<<2;
+			Chords[0] |= 1<<3;
+		}
+		if (! (PIND & 1<<4)) { // D4
+			Chords[0] |= 1<<4;
+			Chords[0] |= 1<<5;
+		}
+		if (! (PINC & 1<<4)) { // C4
+			Chords[1] |= 1<<0;
+			Chords[1] |= 1<<1;
+		}
+		if (! (PINB & 1<<2)) { // B2
+			Chords[1] |= 1<<2;
+			Chords[1] |= 1<<3;
+		}
+		if (! (PINB & 1<<5)) { // B5
+			Chords[1] |= 1<<4;
+			Chords[1] |= 1<<5;
+		}
+		PORTB |= 1<<3;*/
 	}
-	if (! (PINB & 1<<4)) { // B4
-		Chords[1] |= 1<<9;
-		Chords[1] |= 1<<8;
+	Scan_Tick ++;
+	if (Scan_Tick > 20) { // Scan delay
+		Scan_Tick = 0;
 	}
-	if (! (PIND & 1<<4)) { // D4
-		Chords[0] |= 1<<6;
-		Chords[0] |= 1<<7;
-	}
-	if (! (PINB & 1<<5)) { // B5
-		Chords[1] |= 1<<6;
-		Chords[1] |= 1<<7;
-	}
-	PORTB |= 1<<1;
-
-	// Double fingers
-	PORTB &= ~(1<<3); // B3
-	_delay_us(1);
-	if (! (PINC & 1<<2)) { // C2
-		Chords[0] |= 1<<0;
-		Chords[0] |= 1<<1;
-	}
-	if (! (PINB & 1<<0)) { // B0
-		Chords[0] |= 1<<2;
-		Chords[0] |= 1<<3;
-	}
-	if (! (PIND & 1<<4)) { // D4
-		Chords[0] |= 1<<4;
-		Chords[0] |= 1<<5;
-	}
-	if (! (PINC & 1<<4)) { // C4
-		Chords[1] |= 1<<0;
-		Chords[1] |= 1<<1;
-	}
-	if (! (PINB & 1<<2)) { // B2
-		Chords[1] |= 1<<2;
-		Chords[1] |= 1<<3;
-	}
-	if (! (PINB & 1<<5)) { // B5
-		Chords[1] |= 1<<4;
-		Chords[1] |= 1<<5;
-	}
-	PORTB |= 1<<3;
-
-	_delay_ms(5);
 }
