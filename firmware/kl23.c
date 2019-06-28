@@ -35,6 +35,10 @@ uint16_t Chords[2] = {0, 0};
 uint8_t Macros_Buffer[MACROS_BUFFER_SIZE];
 uint8_t Macros_Index = 0;
 
+int8_t Mouse_X;
+int8_t Mouse_Y;
+uint8_t Mouse_Button;
+
 bool Chord_Growing = true;
 uint8_t Q_Mods = 0;
 uint8_t Q_Nav = NAV_MODE;
@@ -531,446 +535,474 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 		        void* ReportData,
 		        uint16_t* const ReportSize)
 {
+
+	if (Time_Tick > 0) {
+		Time_Tick++;
+		if (Time_Tick >= 500) {
+			Time_Tick = 0;
+		}
+	}
+
+	if (Macros_Index < (MACROS_BUFFER_SIZE - MACROS_BUFFER_MAX)) {
+
+
+		uint8_t mods = Q_Mods;
+
+		uint16_t chords[2] = {Chords[0], Chords[1]};
+		Keyboard_Scan();
+
+		if ((Chords[0] & 0x300) != 0x200 && (Chords[1] & 0x300) != 0x200) {
+			Q_Mods = 0;
+			Q_Nav = NAV_MODE;
+			Mouse_Button = 0;
+		}
+		bool isRelease = Chords[0] < chords[0] || Chords[1] < chords[1];
+		bool isPress = Chords[0] > chords[0] || Chords[1] > chords[1];
+		bool isTick = Time_Tick > Chord_Tick && Chords[0] == Chords_Last[0] && Chords[1] == Chords_Last[1];
+		if (isTick) {
+			Time_Tick--;
+		}
+		for (uint8_t side=0; side<=1; side++) {
+			uint16_t chord2 = chords[side];
+			uint16_t chord21 = chords[side ? 0 : 1];
+			if (isPress) {
+				if (side) Chord_Growing = true;
+				Time_Tick = 1;
+			} else if (isRelease || isTick) {
+				if (Chord_Growing) {
+
+					if (Settings_Side && (Settings_Side - 1) == side) { // Settings
+						Settings_Side = 0;
+						uint8_t chord = chord2;
+						if (! (chord2 & ~0x13F)) {
+							if (chord & 0x3) {
+								Layout_Mode = (chord & 0x3) - 1;
+							}
+							if (chord & 0x3C) {
+								OS_Mode = ((chord & 0x3C) >> 2) - 1;
+								Meta = (OS_Mode == OS_MAC) ? HID_KEYBOARD_MODIFIER_LEFTGUI : HID_KEYBOARD_MODIFIER_LEFTCTRL;
+							}
+							if ((chord2 & 0x100) && (chord2 & 0x37)) {
+								Settings_Write();
+							}
+						}
+						LED_Toggle();
+					} else if ((Chords_Last[side] == 0x299 && chords[side] == 0x266) || (Chords_Last[side] == 0x266 && chords[side] == 0x299)) { // Settings
+						Settings_Side = side + 1;
+						LED_Toggle();
+					} else if (chord2 == 0x200 || chord2 == 0x80) { // Layer change
+						if (Layout_Mode == LAYOUTS2) {
+							uint8_t newLayer = LAYER1;
+							if (chord2 == 0x80) {
+								newLayer = LAYER2;
+							}
+							if (Layer_Current != newLayer) {
+								Layout_Switch();
+								Layer_Current = newLayer;
+								LED_Switch(newLayer == LAYER2);
+							}
+						}
+					} else if ((chord2 & 0x300) == 0x200) { // Quasi
+						uint8_t chord = chord2;
+						if (chord == 0x80) { // Enter
+							Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_ENTER;
+							Macros_Buffer[Macros_Index++] = mods;
+						} else if (chord == 0x40 || chord == 0x43) { // Backspace
+							Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_BACKSPACE;
+							Macros_Buffer[Macros_Index++] = mods;
+						} else if (chord == 0x83) { // Space
+							Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_SPACE;
+							Macros_Buffer[Macros_Index++] = mods;
+						} else if (chord == 0xC3) { // Enter Numpad
+							Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_KEYPAD_ENTER;
+							Macros_Buffer[Macros_Index++] = mods;
+						} else if (chord == 0xC0) { // Escape
+							Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_ESCAPE;
+							Macros_Buffer[Macros_Index++] = mods;
+						} else if ((chord & 0x40) && (chord & 0x1) && (chord & 0x14) && ! (chord & 0xAA)) { // Backspaces
+							if (chord == 0x51) { // 2 Backspaces
+								Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_BACKSPACE;
+								Macros_Buffer[Macros_Index++] = 0;
+								Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_BACKSPACE;
+								Macros_Buffer[Macros_Index++] = 0;
+							} else if (chord == 0x45) { // Ctrl+Backspace
+								Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_BACKSPACE;
+								Macros_Buffer[Macros_Index++] = Meta;
+							} else if (chord == 0x55) { // 4 Backspaces
+								Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_BACKSPACE;
+								Macros_Buffer[Macros_Index++] = 0;
+								Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_BACKSPACE;
+								Macros_Buffer[Macros_Index++] = 0;
+								Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_BACKSPACE;
+								Macros_Buffer[Macros_Index++] = 0;
+								Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_BACKSPACE;
+								Macros_Buffer[Macros_Index++] = 0;
+							}
+						} else if ((chord & 0xC0) == 0xC0 && (chord & 0x3C) && (chord & 0x3) != 0x3) { // Func
+							uint8_t chord1 = (chord & 0x3C) >> 2;
+							uint8_t keyCode = pgm_read_byte(&Layer_Func[(chord1 & 0xF) - 1]);
+							if (keyCode) {
+								if (chord == 0xFD) { // Pause/Break
+									keyCode = HID_KEYBOARD_SC_PAUSE;
+								} else if (chord == 0xFE) { // Print Screen
+									keyCode = HID_KEYBOARD_SC_PRINT_SCREEN;
+								} else if ((chord & 0x3) == 0x1) { // Ctrl/Cmd+Func
+									mods |= Meta;
+									Q_Mods = 0;
+								} else if ((chord & 0x3) == 0x2) { // Alt+Func
+									mods |= HID_KEYBOARD_MODIFIER_LEFTALT;
+									Q_Mods = 0;
+								}
+								Macros_Buffer[Macros_Index++] = keyCode;
+								Macros_Buffer[Macros_Index++] = mods;
+							}
+						} else if ((chord & 0x3) == 0x3 && (chord & 0x3C)) { // Num
+							uint8_t chord1 = (chord & 0x3C) >> 2;
+							uint8_t numLayer = 0;
+							if ((chord & 0xC0) == 0xC0) { // NumBlock
+								numLayer = 1;
+							} else if ((chord & 0xC0) == 0x40) { // Ctrl+Num
+								if (! (mods & ~HID_KEYBOARD_MODIFIER_LEFTSHIFT)) {
+									mods = Meta;
+									Q_Mods = 0;
+								}
+							}
+							uint8_t keyCode = pgm_read_byte(&Layer_Num[numLayer][(chord1 & 0xF) - 1]);
+							if (keyCode) {
+								if (! mods) {
+									if (keyCode == HID_KEYBOARD_SC_EQUAL_AND_PLUS) { // = +
+										mods = HID_KEYBOARD_MODIFIER_LEFTSHIFT;
+									} else if (keyCode == HID_KEYBOARD_SC_BACKSLASH_AND_PIPE) { // * 8
+										keyCode = HID_KEYBOARD_SC_8_AND_ASTERISK;
+										mods = HID_KEYBOARD_MODIFIER_LEFTSHIFT;
+									} else if (keyCode == HID_KEYBOARD_SC_SLASH_AND_QUESTION_MARK && Layer_Current == LAYER2) { // / Rus
+										keyCode = HID_KEYBOARD_SC_BACKSLASH_AND_PIPE;
+										mods = HID_KEYBOARD_MODIFIER_LEFTSHIFT;
+									} else if (keyCode == HID_KEYBOARD_SC_DOT_AND_GREATER_THAN_SIGN && Layer_Current == LAYER2) { // , Rus
+										keyCode = HID_KEYBOARD_SC_SLASH_AND_QUESTION_MARK;
+										mods = HID_KEYBOARD_MODIFIER_LEFTSHIFT;
+									}
+								}
+								Macros_Buffer[Macros_Index++] = keyCode;
+								Macros_Buffer[Macros_Index++] = mods;
+							}
+							if ((chord & 0xC0) == 0x80) { // +Space
+								Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_SPACE;
+								Macros_Buffer[Macros_Index++] = 0;
+							}
+						} else if ((chord & 0x3) && (chord & 0x3) != 0x3 && ! (chord & 0x3C) && (chord & 0xC0)) { // Mods+Vowels
+							uint8_t keyCode;
+							if ((chord & 0x3) == 0x2) { // Ctrl+[IOA]
+								keyCode = pgm_read_byte(&Layer_Vowels[((chord & 0xC0) >> 5) - 2]);
+							} else if (chord == 0x41) { // Ctrl+H
+								keyCode = pgm_read_byte(&Layer_Consonants[(0b10000 - 1) << 1]);
+							} else if (chord == 0xC1) { // Ctrl+U
+								keyCode = pgm_read_byte(&Layer_Vowels[(0b0110 - 1) << 1]);
+							} else if (chord == 0x81) { // Ctrl+E
+								keyCode = pgm_read_byte(&Layer_Vowels[(0b1000 - 1) << 1]);
+							}
+							if (keyCode) {
+								if (! (mods & ~HID_KEYBOARD_MODIFIER_LEFTSHIFT)) {
+									mods = Meta;
+								}
+								Q_Mods = 0;
+								Macros_Buffer[Macros_Index++] = keyCode;
+								Macros_Buffer[Macros_Index++] = mods;
+								Macros_Buffer[Macros_Index++] = 0;
+								Macros_Buffer[Macros_Index++] = mods;
+							}
+						} else if ((chord & 0xC0) && (chord & 0x3C)) { // Mods+Consonants
+							uint8_t keyCode = pgm_read_byte(&Layer_Consonants[(((chord >> 2) & 0x1F) - 1) << 1]);
+							if (! (chord & 0x3) && keyCode) {
+								if (! (mods & ~HID_KEYBOARD_MODIFIER_LEFTSHIFT)) {
+									mods = Meta;
+								}
+								Q_Mods = 0;
+								Macros_Buffer[Macros_Index++] = keyCode;
+								Macros_Buffer[Macros_Index++] = mods;
+								Macros_Buffer[Macros_Index++] = 0;
+								Macros_Buffer[Macros_Index++] = mods;
+							} else { // Mods+Symbols
+								if (! (mods & ~HID_KEYBOARD_MODIFIER_LEFTSHIFT)) {
+									mods = Meta;
+								}
+								Q_Mods = 0;
+								if (chord == 0x70) { // Mod+,
+									Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_COMMA_AND_LESS_THAN_SIGN;
+									Macros_Buffer[Macros_Index++] = mods;
+								} else if (chord == 0x71) { // Mod+;
+									Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_SEMICOLON_AND_COLON;
+									Macros_Buffer[Macros_Index++] = mods;
+								} else if (chord == 0x4C) { // Mod+[
+									Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_OPENING_BRACKET_AND_OPENING_BRACE;
+									Macros_Buffer[Macros_Index++] = mods;
+								} else if (chord == 0x4D) { // Mod+]
+									Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_CLOSING_BRACKET_AND_CLOSING_BRACE;
+									Macros_Buffer[Macros_Index++] = mods;
+								} else if (chord == 0x7C) { // Mod+'
+									Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_APOSTROPHE_AND_QUOTE;
+									Macros_Buffer[Macros_Index++] = mods;
+								} else if (chord == 0x7D) { // Mod+`
+									Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_GRAVE_ACCENT_AND_TILDE;
+									Macros_Buffer[Macros_Index++] = mods;
+								}
+							}
+						} else if (Q_Nav == MOU_MODE) { // Mou
+							uint8_t keyCode = pgm_read_byte(&Layer_NavMou[(chord & 0x3F) - 1]);
+							if (keyCode >= HID_KEYBOARD_SC_LEFT_CONTROL && keyCode <= HID_KEYBOARD_SC_RIGHT_GUI) {
+								mods ^= 1 << (keyCode - HID_KEYBOARD_SC_LEFT_CONTROL);
+								if (! chord21) Q_Mods = mods;
+								Macros_Buffer[Macros_Index++] = 0;
+								Macros_Buffer[Macros_Index++] = mods;
+							} else if (chord == 0x1) {
+								Q_Nav = NAV_MODE;
+							} else if ((chord == 0x2 && side) || (chord == 0x20 && ! side)) {
+								Mouse_X = -20;
+							} else if ((chord == 0x20 && side) || (chord == 0x2 && ! side)) {
+								Mouse_X = 20;
+							} else if (chord == 0x4) {
+								Mouse_Y = -20;
+							} else if (chord == 0x8) {
+								Mouse_Y = 20;
+							} else if (chord == 0x3) {
+								Mouse_Button = Mouse_Button & 0x1 ? 0 : 0x1;
+							} else if (chord == 0xC) {
+								Mouse_Button = Mouse_Button & 0x4 ? 0 : 0x4;
+							} else if (chord == 0x30) {
+								Mouse_Button = Mouse_Button & 0x2 ? 0 : 0x2;
+							}
+						} else if (Q_Nav == NAV_MODE) { // Nav
+							uint8_t keyCode = pgm_read_byte(&Layer_NavMou[(chord & 0x3F) - 1]);
+							if (! keyCode) {
+								if (chord == 0x1) {
+									Q_Nav = MOU_MODE;
+								} else if (chord == 0x2C) { // Alt+Tab
+									mods = HID_KEYBOARD_MODIFIER_LEFTALT;
+									Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_TAB;
+									Macros_Buffer[Macros_Index++] = mods;
+									Q_Mods = mods;
+								} else if (chord == 0x1C) { // Ctrl+Tab
+									mods = HID_KEYBOARD_MODIFIER_LEFTCTRL;
+									Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_TAB;
+									Macros_Buffer[Macros_Index++] = mods;
+									Q_Mods = mods;
+								} else if (chord == 0xE) { // Ctrl+PgUp
+									mods = HID_KEYBOARD_MODIFIER_LEFTCTRL;
+									Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_PAGE_UP;
+									Macros_Buffer[Macros_Index++] = mods;
+									Q_Mods = 0;
+								} else if (chord == 0xD) { // Ctrl+PgDn
+									mods = HID_KEYBOARD_MODIFIER_LEFTCTRL;
+									Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_PAGE_DOWN;
+									Macros_Buffer[Macros_Index++] = mods;
+									Q_Mods = 0;
+								} else if (chord == 0x1A) { // Ctrl+Ins
+									mods = HID_KEYBOARD_MODIFIER_LEFTCTRL;
+									Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_INSERT;
+									Macros_Buffer[Macros_Index++] = mods;
+									Q_Mods = 0;
+								} else if (chord == 0x3A) { // Shift+Ins
+									mods = HID_KEYBOARD_MODIFIER_LEFTSHIFT;
+									Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_INSERT;
+									Macros_Buffer[Macros_Index++] = mods;
+									Q_Mods = 0;
+								} else if (chord == 0x25) { // Ctrl+Del
+									mods = HID_KEYBOARD_MODIFIER_LEFTCTRL;
+									Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_DELETE;
+									Macros_Buffer[Macros_Index++] = mods;
+									Q_Mods = 0;
+								} else if (chord == 0x35) { // Shift+Del
+									mods = HID_KEYBOARD_MODIFIER_LEFTSHIFT;
+									Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_DELETE;
+									Macros_Buffer[Macros_Index++] = mods;
+									Q_Mods = 0;
+								}
+							} else {
+								if (keyCode >= HID_KEYBOARD_SC_LEFT_CONTROL && keyCode <= HID_KEYBOARD_SC_RIGHT_GUI) {
+									mods ^= 1 << (keyCode - HID_KEYBOARD_SC_LEFT_CONTROL);
+									if (! chord21) Q_Mods = mods;
+								} else {
+									if (side == 0 && keyCode == HID_KEYBOARD_SC_LEFT_ARROW) {
+										keyCode = HID_KEYBOARD_SC_RIGHT_ARROW;
+									} else if (side == 0 && keyCode == HID_KEYBOARD_SC_RIGHT_ARROW) {
+										keyCode = HID_KEYBOARD_SC_LEFT_ARROW;
+									} else if (side == 0 && keyCode == HID_KEYBOARD_SC_HOME) {
+										keyCode = HID_KEYBOARD_SC_END;
+									} else if (side == 0 && keyCode == HID_KEYBOARD_SC_END) {
+										keyCode = HID_KEYBOARD_SC_HOME;
+									}
+									Macros_Buffer[Macros_Index++] = keyCode;
+									Macros_Buffer[Macros_Index++] = mods;
+								}
+							}
+						}
+					} else {
+						uint16_t isConsonants = chord2 & 0x07C;
+						uint16_t isVowels = chord2 & 0x303;
+						uint16_t isCShift = chord2 & 0x080;
+						if (chord2 == 0xD4) { // Tab
+							Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_TAB;
+							Macros_Buffer[Macros_Index++] = mods;
+						} else if (chord2 == 0x1D4) { // 4 Spaces
+							Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_SPACE;
+							Macros_Buffer[Macros_Index++] = 0;
+							Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_SPACE;
+							Macros_Buffer[Macros_Index++] = 0;
+							Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_SPACE;
+							Macros_Buffer[Macros_Index++] = 0;
+							Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_SPACE;
+							Macros_Buffer[Macros_Index++] = 0;
+						} else if (chord2 == 0x180) { // 2 Spaces
+							Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_SPACE;
+							Macros_Buffer[Macros_Index++] = 0;
+							Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_SPACE;
+							Macros_Buffer[Macros_Index++] = 0;
+						} else { // Letters
+							uint8_t modsV = 0;
+							uint8_t modsC = 0;
+							if (isConsonants) { // Consonants
+								uint8_t chord1 = chord2;
+								chord1 = (chord1 >> 2) & ~0x20;
+								uint8_t keyCode = pgm_read_byte(&Layer_Consonants[Layer_Current ? (chord1 << 1) - 1 : (chord1 << 1) - 2]);
+								if (keyCode) {
+									if (keyCode == HID_KEYBOARD_SC_LEFT_SHIFT) {
+										modsV = HID_KEYBOARD_MODIFIER_LEFTSHIFT;
+									} else {
+										if (isCShift && ! (chord2 & 0x203)) { // CShift
+											modsC = HID_KEYBOARD_MODIFIER_LEFTSHIFT;
+										}
+										if (keyCode == HID_KEYBOARD_SC_3_AND_HASHMARK) { // №
+											mods = HID_KEYBOARD_MODIFIER_LEFTSHIFT;
+										}
+										Macros_Buffer[Macros_Index++] = keyCode;
+										Macros_Buffer[Macros_Index++] = mods | modsC;
+									}
+								} else { // Symbols
+									uint8_t symLayer = 0;
+									if (chord1 == 0x1C) {
+										symLayer = 1;
+									} else if (chord1 == 0x13) {
+										symLayer = 2;
+									} else if (chord1 == 0x1F) {
+										symLayer = 3;
+									}
+									if (symLayer) {
+										uint8_t sym = 0;
+										const uint16_t chord12 = chord2 & 0x303;
+										if ((chord12 == 0 || chord12 == 0x100) && isCShift) sym = 1;
+										else if (chord12 == 0x1) sym = 2;
+										else if (chord12 == 0x2) sym = 3;
+										else if (chord12 == 0x101) sym = 4;
+										else if (chord12 == 0x102) sym = 5;
+										else if (chord12 == 0x300) sym = 6;
+										else if (chord12 == 0x301) sym = 7;
+										else if (chord12 == 0x302) sym = 8;
+										sym = sym << 2; // * 4
+										if (Layer_Current == LAYER2) {
+											sym += 2;
+										}
+										uint8_t keyCode = pgm_read_byte(&Layer_Sym[symLayer - 1][sym]);
+										uint8_t keyMode = pgm_read_byte(&Layer_Sym[symLayer - 1][sym + 1]);
+
+										if (keyMode == KM_SHIFT0) {
+											mods = 0;
+											Macros_Buffer[Macros_Index++] = keyCode;
+											Macros_Buffer[Macros_Index++] = mods;
+										} else if (keyMode == KM_SHIFT1) {
+											mods = HID_KEYBOARD_MODIFIER_LEFTSHIFT;
+											Macros_Buffer[Macros_Index++] = keyCode;
+											Macros_Buffer[Macros_Index++] = mods;
+										} else if (keyMode == KM_LAY_SHIFT0 || keyMode == KM_LAY_SHIFT1) {
+											mods = 0;
+											Macros_Buffer[Macros_Index++] = 0xFF;
+											Macros_Buffer[Macros_Index++] = 0;
+
+											Layout_Switch();
+
+											Macros_Buffer[Macros_Index++] = 0xFF;
+											Macros_Buffer[Macros_Index++] = 0;
+
+											Macros_Buffer[Macros_Index++] = keyCode;
+											Macros_Buffer[Macros_Index++] = keyMode == KM_LAY_SHIFT1 ? HID_KEYBOARD_MODIFIER_LEFTSHIFT : 0;
+
+											Macros_Buffer[Macros_Index++] = 0xFF;
+											Macros_Buffer[Macros_Index++] = 0;
+
+											Layout_Switch();
+
+											Macros_Buffer[Macros_Index++] = 0xFF;
+											Macros_Buffer[Macros_Index++] = 0;
+										} else if (keyMode == KM_MACROS) {
+										}
+										if (isVowels == 0x100 || (isCShift && isVowels)) {
+											Macros_Buffer[Macros_Index++] = 0xFF;
+											Macros_Buffer[Macros_Index++] = 0;
+											Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_SPACE;
+											Macros_Buffer[Macros_Index++] = 0;
+										}
+										isVowels = 0;
+										isCShift = 0;
+									}
+								}
+							}
+							if (isVowels) { // Vowels
+								uint8_t chord1 = (chord2 & 0x3) | ((chord2 & 0x300) >> 6);
+								if ((chord1 & 0xC) == 0xC) {
+									chord1 = chord1 & 0xB;
+								}
+								uint8_t keyCode = pgm_read_byte(&Layer_Vowels[Layer_Current ? (chord1 << 1) - 1 : (chord1 << 1) - 2]);
+								if (! keyCode && Layer_Current == LAYER1) {
+									if (chord1 == 0b00001010) { // ou
+										Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_O;
+										Macros_Buffer[Macros_Index++] = 0;
+										Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_U;
+										Macros_Buffer[Macros_Index++] = 0;
+									} else if (chord1 == 0b00000111) { // ea
+										Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_E;
+										Macros_Buffer[Macros_Index++] = 0;
+										Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_A;
+										Macros_Buffer[Macros_Index++] = 0;
+									} else if (chord1 == 0b00001001) { // io
+										Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_I;
+										Macros_Buffer[Macros_Index++] = 0;
+										Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_O;
+										Macros_Buffer[Macros_Index++] = 0;
+									} else if (chord1 == 0b00001010) { // ae
+										Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_A;
+										Macros_Buffer[Macros_Index++] = 0;
+										Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_E;
+										Macros_Buffer[Macros_Index++] = 0;
+									}
+								}
+								if (keyCode) {
+									Macros_Buffer[Macros_Index++] = keyCode;
+									Macros_Buffer[Macros_Index++] = mods | modsV;
+								}
+								if (isCShift) { // VSpace
+									Macros_Buffer[Macros_Index++] = 0xFF;
+									Macros_Buffer[Macros_Index++] = 0;
+									Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_SPACE;
+									Macros_Buffer[Macros_Index++] = 0;
+								}
+							}
+						}
+					}
+					if (side && isRelease) {
+						Chord_Tick = Time_Tick + Time_Tick / 2;
+						Chords_Last[0] = chords[0];
+						Chords_Last[1] = chords[1];
+						Time_Tick = 0;
+					}
+					if (side && ! isTick) Chord_Growing = false;
+				}
+			}
+		}
+	}
+
 	/* Determine which interface must have its report generated */
 	if (HIDInterfaceInfo == &Keyboard_HID_Interface) {
 		USB_KeyboardReport_Data_t* KeyboardReport = (USB_KeyboardReport_Data_t*)ReportData;
 
-		if (Time_Tick > 0) {
-			Time_Tick++;
-			if (Time_Tick >= 500) {
-				Time_Tick = 0;
-			}
-		}
-
-		if (Macros_Index < (MACROS_BUFFER_SIZE - MACROS_BUFFER_MAX)) {
-
-
-			uint8_t mods = Q_Mods;
-			KeyboardReport->Modifier = mods;
-
-			uint16_t chords[2] = {Chords[0], Chords[1]};
-			Keyboard_Scan();
-
-			if ((Chords[0] & 0x300) != 0x200 && (Chords[1] & 0x300) != 0x200) {
-				Q_Mods = 0;
-			}
-			bool isRelease = Chords[0] < chords[0] || Chords[1] < chords[1];
-			bool isPress = Chords[0] > chords[0] || Chords[1] > chords[1];
-			bool isTick = Time_Tick > Chord_Tick && Chords[0] == Chords_Last[0] && Chords[1] == Chords_Last[1];
-			if (isTick) {
-				Time_Tick--;
-			}
-			for (uint8_t side=0; side<=1; side++) {
-				uint16_t chord2 = chords[side];
-				uint16_t chord21 = chords[side ? 0 : 1];
-				if (isPress) {
-					if (side) Chord_Growing = true;
-					Time_Tick = 1;
-				} else if (isRelease || isTick) {
-					if (Chord_Growing) {
-
-						if (Settings_Side && (Settings_Side - 1) == side) { // Settings
-							Settings_Side = 0;
-							uint8_t chord = chord2;
-							if (! (chord2 & ~0x13F)) {
-								if (chord & 0x3) {
-									Layout_Mode = (chord & 0x3) - 1;
-								}
-								if (chord & 0x3C) {
-									OS_Mode = ((chord & 0x3C) >> 2) - 1;
-									Meta = (OS_Mode == OS_MAC) ? HID_KEYBOARD_MODIFIER_LEFTGUI : HID_KEYBOARD_MODIFIER_LEFTCTRL;
-								}
-								if ((chord2 & 0x100) && (chord2 & 0x37)) {
-									Settings_Write();
-								}
-							}
-							LED_Toggle();
-						} else if ((Chords_Last[side] == 0x299 && chords[side] == 0x266) || (Chords_Last[side] == 0x266 && chords[side] == 0x299)) { // Settings
-							Settings_Side = side + 1;
-							LED_Toggle();
-						} else if (chord2 == 0x200 || chord2 == 0x80) { // Layer change
-							if (Layout_Mode == LAYOUTS2) {
-								uint8_t newLayer = LAYER1;
-								if (chord2 == 0x80) {
-									newLayer = LAYER2;
-								}
-								if (Layer_Current != newLayer) {
-									Layout_Switch();
-									Layer_Current = newLayer;
-									LED_Switch(newLayer == LAYER2);
-								}
-							}
-						} else if ((chord2 & 0x300) == 0x200) { // Quasi
-							uint8_t chord = chord2;
-							if (chord == 0x80) { // Enter
-								Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_ENTER;
-								Macros_Buffer[Macros_Index++] = mods;
-							} else if (chord == 0x40 || chord == 0x43) { // Backspace
-								Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_BACKSPACE;
-								Macros_Buffer[Macros_Index++] = mods;
-							} else if (chord == 0x83) { // Space
-								Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_SPACE;
-								Macros_Buffer[Macros_Index++] = mods;
-							} else if (chord == 0xC3) { // Enter Numpad
-								Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_KEYPAD_ENTER;
-								Macros_Buffer[Macros_Index++] = mods;
-							} else if (chord == 0xC0) { // Escape
-								Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_ESCAPE;
-								Macros_Buffer[Macros_Index++] = mods;
-							} else if ((chord & 0x40) && (chord & 0x1) && (chord & 0x14) && ! (chord & 0xAA)) { // Backspaces
-								if (chord == 0x51) { // 2 Backspaces
-									Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_BACKSPACE;
-									Macros_Buffer[Macros_Index++] = 0;
-									Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_BACKSPACE;
-									Macros_Buffer[Macros_Index++] = 0;
-								} else if (chord == 0x45) { // Ctrl+Backspace
-									Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_BACKSPACE;
-									Macros_Buffer[Macros_Index++] = Meta;
-								} else if (chord == 0x55) { // 4 Backspaces
-									Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_BACKSPACE;
-									Macros_Buffer[Macros_Index++] = 0;
-									Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_BACKSPACE;
-									Macros_Buffer[Macros_Index++] = 0;
-									Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_BACKSPACE;
-									Macros_Buffer[Macros_Index++] = 0;
-									Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_BACKSPACE;
-									Macros_Buffer[Macros_Index++] = 0;
-								}
-							} else if ((chord & 0xC0) == 0xC0 && (chord & 0x3C) && (chord & 0x3) != 0x3) { // Func
-								uint8_t chord1 = (chord & 0x3C) >> 2;
-								uint8_t keyCode = pgm_read_byte(&Layer_Func[(chord1 & 0xF) - 1]);
-								if (keyCode) {
-									if (chord == 0xFD) { // Pause/Break
-										keyCode = HID_KEYBOARD_SC_PAUSE;
-									} else if (chord == 0xFE) { // Print Screen
-										keyCode = HID_KEYBOARD_SC_PRINT_SCREEN;
-									} else if ((chord & 0x3) == 0x1) { // Ctrl/Cmd+Func
-										mods |= Meta;
-										Q_Mods = 0;
-									} else if ((chord & 0x3) == 0x2) { // Alt+Func
-										mods |= HID_KEYBOARD_MODIFIER_LEFTALT;
-										Q_Mods = 0;
-									}
-									Macros_Buffer[Macros_Index++] = keyCode;
-									Macros_Buffer[Macros_Index++] = mods;
-								}
-							} else if ((chord & 0x3) == 0x3 && (chord & 0x3C)) { // Num
-								uint8_t chord1 = (chord & 0x3C) >> 2;
-								uint8_t numLayer = 0;
-								if ((chord & 0xC0) == 0xC0) { // NumBlock
-									numLayer = 1;
-								} else if ((chord & 0xC0) == 0x40) { // Ctrl+Num
-									if (! (mods & ~HID_KEYBOARD_MODIFIER_LEFTSHIFT)) {
-										mods = Meta;
-										Q_Mods = 0;
-									}
-								}
-								uint8_t keyCode = pgm_read_byte(&Layer_Num[numLayer][(chord1 & 0xF) - 1]);
-								if (keyCode) {
-									if (! mods) {
-										if (keyCode == HID_KEYBOARD_SC_EQUAL_AND_PLUS) { // = +
-											mods = HID_KEYBOARD_MODIFIER_LEFTSHIFT;
-										} else if (keyCode == HID_KEYBOARD_SC_BACKSLASH_AND_PIPE) { // * 8
-											keyCode = HID_KEYBOARD_SC_8_AND_ASTERISK;
-											mods = HID_KEYBOARD_MODIFIER_LEFTSHIFT;
-										} else if (keyCode == HID_KEYBOARD_SC_SLASH_AND_QUESTION_MARK && Layer_Current == LAYER2) { // / Rus
-											keyCode = HID_KEYBOARD_SC_BACKSLASH_AND_PIPE;
-											mods = HID_KEYBOARD_MODIFIER_LEFTSHIFT;
-										} else if (keyCode == HID_KEYBOARD_SC_DOT_AND_GREATER_THAN_SIGN && Layer_Current == LAYER2) { // , Rus
-											keyCode = HID_KEYBOARD_SC_SLASH_AND_QUESTION_MARK;
-											mods = HID_KEYBOARD_MODIFIER_LEFTSHIFT;
-										}
-									}
-									Macros_Buffer[Macros_Index++] = keyCode;
-									Macros_Buffer[Macros_Index++] = mods;
-								}
-								if ((chord & 0xC0) == 0x80) { // +Space
-									Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_SPACE;
-									Macros_Buffer[Macros_Index++] = 0;
-								}
-							} else if ((chord & 0x3) && (chord & 0x3) != 0x3 && ! (chord & 0x3C) && (chord & 0xC0)) { // Mods+Vowels
-								uint8_t keyCode;
-								if ((chord & 0x3) == 0x2) { // Ctrl+[IOA]
-									keyCode = pgm_read_byte(&Layer_Vowels[((chord & 0xC0) >> 5) - 2]);
-								} else if (chord == 0x41) { // Ctrl+H
-									keyCode = pgm_read_byte(&Layer_Consonants[(0b10000 - 1) << 1]);
-								} else if (chord == 0xC1) { // Ctrl+U
-									keyCode = pgm_read_byte(&Layer_Vowels[(0b0110 - 1) << 1]);
-								} else if (chord == 0x81) { // Ctrl+E
-									keyCode = pgm_read_byte(&Layer_Vowels[(0b1000 - 1) << 1]);
-								}
-								if (keyCode) {
-									if (! (mods & ~HID_KEYBOARD_MODIFIER_LEFTSHIFT)) {
-										mods = Meta;
-									}
-									Q_Mods = 0;
-									Macros_Buffer[Macros_Index++] = keyCode;
-									Macros_Buffer[Macros_Index++] = mods;
-									Macros_Buffer[Macros_Index++] = 0;
-									Macros_Buffer[Macros_Index++] = mods;
-								}
-							} else if ((chord & 0xC0) && (chord & 0x3C)) { // Mods+Consonants
-								uint8_t keyCode = pgm_read_byte(&Layer_Consonants[(((chord >> 2) & 0x1F) - 1) << 1]);
-								if (! (chord & 0x3) && keyCode) {
-									if (! (mods & ~HID_KEYBOARD_MODIFIER_LEFTSHIFT)) {
-										mods = Meta;
-									}
-									Q_Mods = 0;
-									Macros_Buffer[Macros_Index++] = keyCode;
-									Macros_Buffer[Macros_Index++] = mods;
-									Macros_Buffer[Macros_Index++] = 0;
-									Macros_Buffer[Macros_Index++] = mods;
-								} else { // Mods+Symbols
-									if (! (mods & ~HID_KEYBOARD_MODIFIER_LEFTSHIFT)) {
-										mods = Meta;
-									}
-									Q_Mods = 0;
-									if (chord == 0x70) { // Mod+,
-										Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_COMMA_AND_LESS_THAN_SIGN;
-										Macros_Buffer[Macros_Index++] = mods;
-									} else if (chord == 0x71) { // Mod+;
-										Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_SEMICOLON_AND_COLON;
-										Macros_Buffer[Macros_Index++] = mods;
-									} else if (chord == 0x4C) { // Mod+[
-										Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_OPENING_BRACKET_AND_OPENING_BRACE;
-										Macros_Buffer[Macros_Index++] = mods;
-									} else if (chord == 0x4D) { // Mod+]
-										Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_CLOSING_BRACKET_AND_CLOSING_BRACE;
-										Macros_Buffer[Macros_Index++] = mods;
-									} else if (chord == 0x7C) { // Mod+'
-										Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_APOSTROPHE_AND_QUOTE;
-										Macros_Buffer[Macros_Index++] = mods;
-									} else if (chord == 0x7D) { // Mod+`
-										Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_GRAVE_ACCENT_AND_TILDE;
-										Macros_Buffer[Macros_Index++] = mods;
-									}
-								}
-							} else if (Q_Nav == NAV_MODE) { // Nav
-								uint8_t keyCode = pgm_read_byte(&Layer_NavMou[(chord & 0x3F) - 1]);
-								if (! keyCode) {
-									// TODO: Mou, Mods
-									if (chord == 0x2C) { // Alt+Tab
-										mods = HID_KEYBOARD_MODIFIER_LEFTALT;
-										Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_TAB;
-										Macros_Buffer[Macros_Index++] = mods;
-										Q_Mods = mods;
-									} else if (chord == 0x1C) { // Ctrl+Tab
-										mods = HID_KEYBOARD_MODIFIER_LEFTCTRL;
-										Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_TAB;
-										Macros_Buffer[Macros_Index++] = mods;
-										Q_Mods = mods;
-									} else if (chord == 0xE) { // Ctrl+PgUp
-										mods = HID_KEYBOARD_MODIFIER_LEFTCTRL;
-										Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_PAGE_UP;
-										Macros_Buffer[Macros_Index++] = mods;
-										Q_Mods = 0;
-									} else if (chord == 0xD) { // Ctrl+PgDn
-										mods = HID_KEYBOARD_MODIFIER_LEFTCTRL;
-										Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_PAGE_DOWN;
-										Macros_Buffer[Macros_Index++] = mods;
-										Q_Mods = 0;
-									} else if (chord == 0x1A) { // Ctrl+Ins
-										mods = HID_KEYBOARD_MODIFIER_LEFTCTRL;
-										Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_INSERT;
-										Macros_Buffer[Macros_Index++] = mods;
-										Q_Mods = 0;
-									} else if (chord == 0x3A) { // Shift+Ins
-										mods = HID_KEYBOARD_MODIFIER_LEFTSHIFT;
-										Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_INSERT;
-										Macros_Buffer[Macros_Index++] = mods;
-										Q_Mods = 0;
-									} else if (chord == 0x25) { // Ctrl+Del
-										mods = HID_KEYBOARD_MODIFIER_LEFTCTRL;
-										Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_DELETE;
-										Macros_Buffer[Macros_Index++] = mods;
-										Q_Mods = 0;
-									} else if (chord == 0x35) { // Shift+Del
-										mods = HID_KEYBOARD_MODIFIER_LEFTSHIFT;
-										Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_DELETE;
-										Macros_Buffer[Macros_Index++] = mods;
-										Q_Mods = 0;
-									}
-								} else {
-									if (keyCode >= HID_KEYBOARD_SC_LEFT_CONTROL && keyCode <= HID_KEYBOARD_SC_RIGHT_GUI) {
-										mods ^= 1 << (keyCode - HID_KEYBOARD_SC_LEFT_CONTROL);
-										if (! chord21) Q_Mods = mods;
-									} else {
-										if (side == 0 && keyCode == HID_KEYBOARD_SC_LEFT_ARROW) {
-											keyCode = HID_KEYBOARD_SC_RIGHT_ARROW;
-										} else if (side == 0 && keyCode == HID_KEYBOARD_SC_RIGHT_ARROW) {
-											keyCode = HID_KEYBOARD_SC_LEFT_ARROW;
-										} else if (side == 0 && keyCode == HID_KEYBOARD_SC_HOME) {
-											keyCode = HID_KEYBOARD_SC_END;
-										} else if (side == 0 && keyCode == HID_KEYBOARD_SC_END) {
-											keyCode = HID_KEYBOARD_SC_HOME;
-										}
-										Macros_Buffer[Macros_Index++] = keyCode;
-										Macros_Buffer[Macros_Index++] = mods;
-									}
-								}
-							}
-						} else {
-							uint16_t isConsonants = chord2 & 0x07C;
-							uint16_t isVowels = chord2 & 0x303;
-							uint16_t isCShift = chord2 & 0x080;
-							if (chord2 == 0xD4) { // Tab
-								Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_TAB;
-								Macros_Buffer[Macros_Index++] = mods;
-							} else if (chord2 == 0x1D4) { // 4 Spaces
-								Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_SPACE;
-								Macros_Buffer[Macros_Index++] = 0;
-								Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_SPACE;
-								Macros_Buffer[Macros_Index++] = 0;
-								Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_SPACE;
-								Macros_Buffer[Macros_Index++] = 0;
-								Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_SPACE;
-								Macros_Buffer[Macros_Index++] = 0;
-							} else if (chord2 == 0x180) { // 2 Spaces
-								Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_SPACE;
-								Macros_Buffer[Macros_Index++] = 0;
-								Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_SPACE;
-								Macros_Buffer[Macros_Index++] = 0;
-							} else { // Letters
-								uint8_t modsV = 0;
-								uint8_t modsC = 0;
-								if (isConsonants) { // Consonants
-									uint8_t chord1 = chord2;
-									chord1 = (chord1 >> 2) & ~0x20;
-									uint8_t keyCode = pgm_read_byte(&Layer_Consonants[Layer_Current ? (chord1 << 1) - 1 : (chord1 << 1) - 2]);
-									if (keyCode) {
-										if (keyCode == HID_KEYBOARD_SC_LEFT_SHIFT) {
-											modsV = HID_KEYBOARD_MODIFIER_LEFTSHIFT;
-										} else {
-											if (isCShift && ! (chord2 & 0x203)) { // CShift
-												modsC = HID_KEYBOARD_MODIFIER_LEFTSHIFT;
-											}
-											if (keyCode == HID_KEYBOARD_SC_3_AND_HASHMARK) { // №
-												mods = HID_KEYBOARD_MODIFIER_LEFTSHIFT;
-											}
-											Macros_Buffer[Macros_Index++] = keyCode;
-											Macros_Buffer[Macros_Index++] = mods | modsC;
-										}
-									} else { // Symbols
-										uint8_t symLayer = 0;
-										if (chord1 == 0x1C) {
-											symLayer = 1;
-										} else if (chord1 == 0x13) {
-											symLayer = 2;
-										} else if (chord1 == 0x1F) {
-											symLayer = 3;
-										}
-										if (symLayer) {
-											uint8_t sym = 0;
-											const uint16_t chord12 = chord2 & 0x303;
-											if ((chord12 == 0 || chord12 == 0x100) && isCShift) sym = 1;
-											else if (chord12 == 0x1) sym = 2;
-											else if (chord12 == 0x2) sym = 3;
-											else if (chord12 == 0x101) sym = 4;
-											else if (chord12 == 0x102) sym = 5;
-											else if (chord12 == 0x300) sym = 6;
-											else if (chord12 == 0x301) sym = 7;
-											else if (chord12 == 0x302) sym = 8;
-											sym = sym << 2; // * 4
-											if (Layer_Current == LAYER2) {
-												sym += 2;
-											}
-											uint8_t keyCode = pgm_read_byte(&Layer_Sym[symLayer - 1][sym]);
-											uint8_t keyMode = pgm_read_byte(&Layer_Sym[symLayer - 1][sym + 1]);
-
-											if (keyMode == KM_SHIFT0) {
-												mods = 0;
-												Macros_Buffer[Macros_Index++] = keyCode;
-												Macros_Buffer[Macros_Index++] = mods;
-											} else if (keyMode == KM_SHIFT1) {
-												mods = HID_KEYBOARD_MODIFIER_LEFTSHIFT;
-												Macros_Buffer[Macros_Index++] = keyCode;
-												Macros_Buffer[Macros_Index++] = mods;
-											} else if (keyMode == KM_LAY_SHIFT0 || keyMode == KM_LAY_SHIFT1) {
-												mods = 0;
-												Macros_Buffer[Macros_Index++] = 0xFF;
-												Macros_Buffer[Macros_Index++] = 0;
-
-												Layout_Switch();
-
-												Macros_Buffer[Macros_Index++] = 0xFF;
-												Macros_Buffer[Macros_Index++] = 0;
-
-												Macros_Buffer[Macros_Index++] = keyCode;
-												Macros_Buffer[Macros_Index++] = keyMode == KM_LAY_SHIFT1 ? HID_KEYBOARD_MODIFIER_LEFTSHIFT : 0;
-
-												Macros_Buffer[Macros_Index++] = 0xFF;
-												Macros_Buffer[Macros_Index++] = 0;
-
-												Layout_Switch();
-
-												Macros_Buffer[Macros_Index++] = 0xFF;
-												Macros_Buffer[Macros_Index++] = 0;
-											} else if (keyMode == KM_MACROS) {
-											}
-											if (isVowels == 0x100 || (isCShift && isVowels)) {
-												Macros_Buffer[Macros_Index++] = 0xFF;
-												Macros_Buffer[Macros_Index++] = 0;
-												Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_SPACE;
-												Macros_Buffer[Macros_Index++] = 0;
-											}
-											isVowels = 0;
-											isCShift = 0;
-										}
-									}
-								}
-								if (isVowels) { // Vowels
-									uint8_t chord1 = (chord2 & 0x3) | ((chord2 & 0x300) >> 6);
-									if ((chord1 & 0xC) == 0xC) {
-										chord1 = chord1 & 0xB;
-									}
-									uint8_t keyCode = pgm_read_byte(&Layer_Vowels[Layer_Current ? (chord1 << 1) - 1 : (chord1 << 1) - 2]);
-									if (! keyCode && Layer_Current == LAYER1) {
-										if (chord1 == 0b00001010) { // ou
-											Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_O;
-											Macros_Buffer[Macros_Index++] = 0;
-											Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_U;
-											Macros_Buffer[Macros_Index++] = 0;
-										} else if (chord1 == 0b00000111) { // ea
-											Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_E;
-											Macros_Buffer[Macros_Index++] = 0;
-											Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_A;
-											Macros_Buffer[Macros_Index++] = 0;
-										} else if (chord1 == 0b00001001) { // io
-											Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_I;
-											Macros_Buffer[Macros_Index++] = 0;
-											Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_O;
-											Macros_Buffer[Macros_Index++] = 0;
-										} else if (chord1 == 0b00001010) { // ae
-											Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_A;
-											Macros_Buffer[Macros_Index++] = 0;
-											Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_E;
-											Macros_Buffer[Macros_Index++] = 0;
-										}
-									}
-									if (keyCode) {
-										Macros_Buffer[Macros_Index++] = keyCode;
-										Macros_Buffer[Macros_Index++] = mods | modsV;
-									}
-									if (isCShift) { // VSpace
-										Macros_Buffer[Macros_Index++] = 0xFF;
-										Macros_Buffer[Macros_Index++] = 0;
-										Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_SPACE;
-										Macros_Buffer[Macros_Index++] = 0;
-									}
-								}
-							}
-						}
-						if (side && isRelease) {
-							Chord_Tick = Time_Tick + Time_Tick / 2;
-							Chords_Last[0] = chords[0];
-							Chords_Last[1] = chords[1];
-							Time_Tick = 0;
-						}
-						if (side && ! isTick) Chord_Growing = false;
-					}
-				}
-			}
-		}
 		if (Macros_Index) {
 			if (Time_Tick >= Chord_Tick) {
 				Time_Tick = Time_Tick - Time_Tick / 8;
@@ -989,12 +1021,32 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 				Macros_Buffer[MACROS_BUFFER_SIZE - 2] = 0;
 				Macros_Index -= 2;
 			}
+		} else {
+			KeyboardReport->Modifier = Q_Mods;
 		}
 
 		*ReportSize = sizeof(USB_KeyboardReport_Data_t);
 		return true;
 	} else {
 		USB_MouseReport_Data_t* MouseReport = (USB_MouseReport_Data_t*)ReportData;
+
+		if (Mouse_X > 0) {
+			MouseReport->X = 10;
+			Mouse_X --;
+		}
+		if (Mouse_X < 0) {
+			MouseReport->X = -10;
+			Mouse_X ++;
+		}
+		if (Mouse_Y > 0) {
+			MouseReport->Y = 10;
+			Mouse_Y --;
+		}
+		if (Mouse_Y < 0) {
+			MouseReport->Y = -10;
+			Mouse_Y ++;
+		}
+		MouseReport->Button = Mouse_Button;
 
 		/* If first board button being held down, no mouse report */
 		/*if (ButtonStatus_LCL & BUTTONS_BUTTON1)

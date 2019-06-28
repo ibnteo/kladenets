@@ -107,7 +107,7 @@ void Keyboard_Scan() {
 		PORTB |= 1<<3;
 	}
 	Scan_Tick ++;
-	if (Scan_Tick > 20) { // Scan delay
+	if (Scan_Tick > 50) { // Scan delay
 		Scan_Tick = 0;
 	}
 }
