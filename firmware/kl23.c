@@ -54,10 +54,10 @@ uint16_t Chord_Tick = 0;
 uint16_t Chords_Last[2] = {0, 0};
 
 // EEPROM Settings
-#define LAYOUTS1	0
-#define LAYOUTS2	1
+#define LAYOUTS_TWO	0
+#define LAYOUTS_ONE	1
 
-uint8_t Layout_Mode = LAYOUTS2;
+uint8_t Layout_Mode = LAYOUTS_TWO;
 uint8_t EE_Layout_Mode EEMEM;
 
 #define OS_LINUX	0
@@ -596,7 +596,7 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 						Settings_Side = side + 1;
 						LED_Toggle();
 					} else if (chord2 == 0x200 || chord2 == 0x80) { // Layer change
-						if (Layout_Mode == LAYOUTS2) {
+						if (Layout_Mode == LAYOUTS_TWO) {
 							uint8_t newLayer = LAYER1;
 							if (chord2 == 0x80) {
 								newLayer = LAYER2;
