@@ -37,6 +37,7 @@ uint8_t Macros_Index = 0;
 
 int8_t Mouse_X;
 int8_t Mouse_Y;
+int8_t Mouse_W;
 uint8_t Mouse_Button;
 
 #define MOU_ROUG	0
@@ -772,6 +773,10 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 								Mouse_Y = -step;
 							} else if (chord == 0x8) {
 								Mouse_Y = step;
+							} else if (chord == 0x9) {
+								Mouse_W = -1;
+							} else if (chord == 0x6) {
+								Mouse_W = 1;
 							} else if (chord == 0x3) {
 								Mouse_Button = Mouse_Button & 0x1 ? 0 : 0x1;
 							} else if (chord == 0xC) {
@@ -1045,26 +1050,11 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 
 		MouseReport->X = Mouse_X;
 		MouseReport->Y = Mouse_Y;
+		MouseReport->W = Mouse_W;
 		Mouse_X = 0;
 		Mouse_Y = 0;
+		Mouse_W = 0;
 		MouseReport->Button = Mouse_Button;
-
-		/* If first board button being held down, no mouse report */
-		/*if (ButtonStatus_LCL & BUTTONS_BUTTON1)
-		return 0;
-
-		if (JoyStatus_LCL & JOY_UP)
-		  MouseReport->Y = -1;
-		else if (JoyStatus_LCL & JOY_DOWN)
-		  MouseReport->Y =  1;
-
-		if (JoyStatus_LCL & JOY_LEFT)
-		  MouseReport->X = -1;
-		else if (JoyStatus_LCL & JOY_RIGHT)
-		  MouseReport->X =  1;
-
-		if (JoyStatus_LCL & JOY_PRESS)
-		  MouseReport->Button |= (1 << 0);*/
 
 		*ReportSize = sizeof(USB_MouseReport_Data_t);
 		return true;
