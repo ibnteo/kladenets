@@ -39,6 +39,10 @@ int8_t Mouse_X;
 int8_t Mouse_Y;
 uint8_t Mouse_Button;
 
+#define MOU_ROUG	0
+#define MOU_PREC	1
+uint8_t Mou_Speed = MOU_ROUG;
+
 bool Chord_Growing = true;
 uint8_t Q_Mods = 0;
 uint8_t Q_Nav = NAV_MODE;
@@ -749,6 +753,8 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 							}
 						} else if (Q_Nav == MOU_MODE) { // Mou
 							uint8_t keyCode = pgm_read_byte(&Layer_NavMou[(chord & 0x3F) - 1]);
+							int8_t step = isTick ? 2 : 20;
+							if (Mou_Speed == MOU_PREC) step = 1;
 							if (keyCode >= HID_KEYBOARD_SC_LEFT_CONTROL && keyCode <= HID_KEYBOARD_SC_RIGHT_GUI) {
 								mods ^= 1 << (keyCode - HID_KEYBOARD_SC_LEFT_CONTROL);
 								if (! chord21) Q_Mods = mods;
@@ -756,14 +762,16 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 								Macros_Buffer[Macros_Index++] = mods;
 							} else if (chord == 0x1) {
 								Q_Nav = NAV_MODE;
+							} else if (chord == 0x10) {
+								Mou_Speed = (Mou_Speed == MOU_PREC) ? MOU_ROUG : MOU_PREC;
 							} else if ((chord == 0x2 && side) || (chord == 0x20 && ! side)) {
-								Mouse_X = -20;
+								Mouse_X = -step;
 							} else if ((chord == 0x20 && side) || (chord == 0x2 && ! side)) {
-								Mouse_X = 20;
+								Mouse_X = step;
 							} else if (chord == 0x4) {
-								Mouse_Y = -20;
+								Mouse_Y = -step;
 							} else if (chord == 0x8) {
-								Mouse_Y = 20;
+								Mouse_Y = step;
 							} else if (chord == 0x3) {
 								Mouse_Button = Mouse_Button & 0x1 ? 0 : 0x1;
 							} else if (chord == 0xC) {
@@ -776,6 +784,11 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 							if (! keyCode) {
 								if (chord == 0x1) {
 									Q_Nav = MOU_MODE;
+								} else if (chord == 0x1E) { // Ctrl+Alt
+									mods = HID_KEYBOARD_MODIFIER_LEFTALT | HID_KEYBOARD_MODIFIER_LEFTCTRL;
+									Macros_Buffer[Macros_Index++] = 0;
+									Macros_Buffer[Macros_Index++] = mods;
+									if (! chord21) Q_Mods = mods;
 								} else if (chord == 0x2C) { // Alt+Tab
 									mods = HID_KEYBOARD_MODIFIER_LEFTALT;
 									Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_TAB;
@@ -1030,22 +1043,10 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 	} else {
 		USB_MouseReport_Data_t* MouseReport = (USB_MouseReport_Data_t*)ReportData;
 
-		if (Mouse_X > 0) {
-			MouseReport->X = 10;
-			Mouse_X --;
-		}
-		if (Mouse_X < 0) {
-			MouseReport->X = -10;
-			Mouse_X ++;
-		}
-		if (Mouse_Y > 0) {
-			MouseReport->Y = 10;
-			Mouse_Y --;
-		}
-		if (Mouse_Y < 0) {
-			MouseReport->Y = -10;
-			Mouse_Y ++;
-		}
+		MouseReport->X = Mouse_X;
+		MouseReport->Y = Mouse_Y;
+		Mouse_X = 0;
+		Mouse_Y = 0;
 		MouseReport->Button = Mouse_Button;
 
 		/* If first board button being held down, no mouse report */
