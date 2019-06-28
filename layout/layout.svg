@@ -54,8 +54,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="1.4"
-     inkscape:cx="271.89053"
-     inkscape:cy="580.93642"
+     inkscape:cx="377.09705"
+     inkscape:cy="795.12267"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -1731,7 +1731,7 @@
          y="240.25659"
          x="570.39801"
          id="tspan8399"
-         sodipodi:role="line">y</tspan></text>
+         sodipodi:role="line">f</tspan></text>
     <text
        inkscape:export-ydpi="130.32001"
        inkscape:export-xdpi="130.32001"
@@ -2016,7 +2016,7 @@
          x="551.86951"
          id="tspan8499"
          sodipodi:role="line"
-         style="font-size:15px">f</tspan></text>
+         style="font-size:15px">y</tspan></text>
     <text
        inkscape:export-ydpi="130.32001"
        inkscape:export-xdpi="130.32001"
@@ -4493,7 +4493,7 @@
          x="166.24484"
          id="tspan8499-2"
          sodipodi:role="line"
-         style="font-size:15px">f</tspan></text>
+         style="font-size:15px">y</tspan></text>
     <text
        inkscape:export-ydpi="130.32001"
        inkscape:export-xdpi="130.32001"
@@ -4506,7 +4506,7 @@
          y="238.4751"
          x="150.71428"
          id="tspan8399-2"
-         sodipodi:role="line">y</tspan></text>
+         sodipodi:role="line">f</tspan></text>
     <text
        inkscape:export-ydpi="130.32001"
        inkscape:export-xdpi="130.32001"
