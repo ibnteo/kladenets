@@ -33,86 +33,89 @@ void Ports_Init() {
 }
 
 void LED_On() {
-	PORTD &= ~(1<<5);
+	PORTB &= ~(1<<0);
 }
 void LED_Off() {
-	PORTD |= 1<<5;
+	PORTB |= 1<<0;
 }
 void LED_Toggle() {
-	PORTD ^= 1<<5;
+	PORTB ^= 1<<0;
 }
 void LED_Switch(bool on) {
 	if (on) LED_On(); else LED_Off();
 }
 
 void LED2_On() {
-	PORTB &= ~(1<<0);
+	PORTD &= ~(1<<5);
 }
 void LED2_Off() {
-	PORTB |= 1<<0;
+	PORTD |= 1<<5;
 }
 void LED2_Toggle() {
-	PORTB ^= 1<<0;
+	PORTD ^= 1<<5;
 }
 void LED2_Switch(bool on) {
 	if (on) LED2_On(); else LED2_Off();
 }
 
+void Chord_Set(uint8_t index, uint8_t bit, bool notset) {
+	if (notset) {
+		Chords[index] &= ~(1<<bit);
+	} else {
+		Chords[index] |= 1<<bit;
+	}
+}
+
+uint8_t Scan_Tick = 0;
 void Keyboard_Scan() {
-	Chords[0] = 0;
-	Chords[1] = 0;
-
-	PORTB &= ~(1<<4); // B4
-	_delay_us(1);
-	if (! (PIND & 1<<0)) Chords[0] |= 1<<0; // D0
-	if (! (PIND & 1<<7)) Chords[0] |= 1<<1; // D7
-	if (! (PINB & 1<<5)) Chords[0] |= 1<<9; // B5
-	PORTB |= 1<<4;
-
-	PORTC &= ~(1<<6); // C6
-	_delay_us(1);
-	if (! (PIND & 1<<0)) Chords[0] |= 1<<2; // D0
-	if (! (PIND & 1<<7)) Chords[0] |= 1<<3; // D7
-	if (! (PINB & 1<<5)) Chords[0] |= 1<<8; // B5
-	PORTC |= 1<<6;
-
-	PORTE &= ~(1<<6); // E6
-	_delay_us(1);
-	if (! (PIND & 1<<0)) Chords[0] |= 1<<4; // D0
-	if (! (PIND & 1<<7)) Chords[0] |= 1<<5; // D7
-	PORTE |= 1<<6;
-
-	PORTD &= ~(1<<4); // D4
-	_delay_us(1);
-	if (! (PIND & 1<<0)) Chords[0] |= 1<<6; // D0
-	if (! (PIND & 1<<7)) Chords[0] |= 1<<7; // D7
-	PORTD |= 1<<4;
-
-	PORTB &= ~(1<<2); // B2
-	_delay_us(1);
-	if (! (PINF & 1<<5)) Chords[1] |= 1<<0; // F5
-	if (! (PINB & 1<<1)) Chords[1] |= 1<<1; // B1
-	if (! (PINB & 1<<5)) Chords[1] |= 1<<9; // B5
-	PORTB |= 1<<2;
-
-	PORTF &= ~(1<<7); // F7
-	_delay_us(1);
-	if (! (PINF & 1<<5)) Chords[1] |= 1<<2; // F5
-	if (! (PINB & 1<<1)) Chords[1] |= 1<<3; // B1
-	if (! (PINB & 1<<5)) Chords[1] |= 1<<8; // B5
-	PORTF |= 1<<7;
-
-	PORTF &= ~(1<<6); // F6
-	_delay_us(1);
-	if (! (PINF & 1<<5)) Chords[1] |= 1<<4; // F5
-	if (! (PINB & 1<<1)) Chords[1] |= 1<<5; // B1
-	PORTF |= 1<<6;
-
-	PORTB &= ~(1<<3); // B3
-	_delay_us(1);
-	if (! (PINF & 1<<5)) Chords[1] |= 1<<6; // F5
-	if (! (PINB & 1<<1)) Chords[1] |= 1<<7; // B1
-	PORTB |= 1<<3;
-
-	_delay_ms(5);
+	if (Scan_Tick == 0) {
+		PORTB &= ~(1<<4); // B4
+	} else if (Scan_Tick == 1) {
+		Chord_Set(0, 0, PIND & 1<<0);
+		Chord_Set(0, 1, PIND & 1<<7);
+		Chord_Set(0, 9, PINB & 1<<5);
+		PORTB |= 1<<4;
+		PORTC &= ~(1<<6); // C6
+	} else if (Scan_Tick == 2) {
+		Chord_Set(0, 2, PIND & 1<<0);
+		Chord_Set(0, 3, PIND & 1<<7);
+		Chord_Set(0, 8, PINB & 1<<5);
+		PORTC |= 1<<6;
+		PORTE &= ~(1<<6); // E6
+	} else if (Scan_Tick == 3) {
+		Chord_Set(0, 4, PIND & 1<<0);
+		Chord_Set(0, 5, PIND & 1<<7);
+		PORTE |= 1<<6;
+		PORTD &= ~(1<<4); // D4
+	} else if (Scan_Tick == 4) {
+		Chord_Set(0, 6, PIND & 1<<0);
+		Chord_Set(0, 7, PIND & 1<<7);
+		PORTD |= 1<<4;
+		PORTB &= ~(1<<2); // B2
+	} else if (Scan_Tick == 5) {
+		Chord_Set(1, 0, PINF & 1<<5);
+		Chord_Set(1, 1, PINB & 1<<1);
+		Chord_Set(1, 9, PINB & 1<<5);
+		PORTB |= 1<<2;
+		PORTF &= ~(1<<7); // F7
+	} else if (Scan_Tick == 6) {
+		Chord_Set(1, 2, PINF & 1<<5);
+		Chord_Set(1, 3, PINB & 1<<1);
+		Chord_Set(1, 8, PINB & 1<<5);
+		PORTF |= 1<<7;
+		PORTF &= ~(1<<6); // F6
+	} else if (Scan_Tick == 7) {
+		Chord_Set(1, 4, PINF & 1<<5);
+		Chord_Set(1, 5, PINB & 1<<1);
+		PORTF |= 1<<6;
+		PORTB &= ~(1<<3); // B3
+	} else if (Scan_Tick == 8) {
+		Chord_Set(1, 6, PINF & 1<<5);
+		Chord_Set(1, 7, PINB & 1<<1);
+		PORTB |= 1<<3;
+	}
+	Scan_Tick ++;
+	if (Scan_Tick > 20) { // Scan delay
+		Scan_Tick = 0;
+	}
 }
