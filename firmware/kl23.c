@@ -567,7 +567,7 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 		bool isPress = Chords[0] > chords[0] || Chords[1] > chords[1];
 		bool isTick = Time_Tick > Chord_Tick && Chords[0] == Chords_Last[0] && Chords[1] == Chords_Last[1];
 		if (isTick) {
-			Time_Tick--;
+			Time_Tick = Time_Tick - Time_Tick / 4;
 		}
 		for (uint8_t side=0; side<=1; side++) {
 			uint16_t chord2 = chords[side];
@@ -801,11 +801,11 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 									Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_INSERT;
 									Macros_Buffer[Macros_Index++] = mods;
 									Q_Mods = 0;
-								} else if (chord == 0x25) { // Ctrl+Del
+								/*} else if (chord == 0x25) { // Ctrl+Del
 									mods = HID_KEYBOARD_MODIFIER_LEFTCTRL;
 									Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_DELETE;
 									Macros_Buffer[Macros_Index++] = mods;
-									Q_Mods = 0;
+									Q_Mods = 0;*/
 								} else if (chord == 0x35) { // Shift+Del
 									mods = HID_KEYBOARD_MODIFIER_LEFTSHIFT;
 									Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_DELETE;
@@ -819,6 +819,16 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 								} else if (chord == 0x38) { // Alt+Down
 									mods = HID_KEYBOARD_MODIFIER_LEFTALT;
 									Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_DOWN_ARROW;
+									Macros_Buffer[Macros_Index++] = mods;
+									Q_Mods = 0;
+								} else if (chord == 0x16) { // Ctrl+Left
+									mods = HID_KEYBOARD_MODIFIER_LEFTCTRL;
+									Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_LEFT_ARROW;
+									Macros_Buffer[Macros_Index++] = mods;
+									Q_Mods = 0;
+								} else if (chord == 0x25) { // Ctrl+Right
+									mods = HID_KEYBOARD_MODIFIER_LEFTCTRL;
+									Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_RIGHT_ARROW;
 									Macros_Buffer[Macros_Index++] = mods;
 									Q_Mods = 0;
 								}
@@ -1022,7 +1032,7 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 					}
 					if (side && isRelease) {
 						Chord_Tick = Time_Tick + Time_Tick / 2;
-						if (Chord_Tick < 30) Chord_Tick = 30;
+						if (Chord_Tick < 50) Chord_Tick = 50;
 						Chords_Last[0] = chords[0];
 						Chords_Last[1] = chords[1];
 						Time_Tick = 0;
@@ -1038,9 +1048,9 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 		USB_KeyboardReport_Data_t* KeyboardReport = (USB_KeyboardReport_Data_t*)ReportData;
 
 		if (Macros_Index) {
-			if (Time_Tick >= Chord_Tick) {
-				Time_Tick = Time_Tick - Time_Tick / 4;
-			}
+			/*if (Time_Tick >= Chord_Tick) {
+				Time_Tick = Chord_Tick / 4;
+			}*/
 			KeyboardReport->KeyCode[0] = (Macros_Buffer[0] == 0xFF ? 0 : Macros_Buffer[0]);
 			KeyboardReport->Modifier = Macros_Buffer[1];
 			if (Macros_Buffer[0] == Macros_Buffer[2] && Macros_Buffer[2] != 0xFF) {
