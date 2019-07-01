@@ -19,9 +19,9 @@
 
 uint16_t Chords[2] = {0, 0};
 // Ports_Init(), LEDs(), Keyboard_Scan()
-//#include "microsin162.h"
+#include "microsin162.h"
 //#include "catboard2.h"
-#include "promicro.h"
+//#include "promicro.h"
 //#include "wakizashi.h"
 
 #define LAYER1 0
@@ -567,7 +567,7 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 		bool isPress = Chords[0] > chords[0] || Chords[1] > chords[1];
 		bool isTick = Time_Tick > Chord_Tick && Chords[0] == Chords_Last[0] && Chords[1] == Chords_Last[1];
 		if (isTick) {
-			Time_Tick = Time_Tick - Time_Tick / 4;
+			Time_Tick = Time_Tick - Time_Tick / 8;
 		}
 		for (uint8_t side=0; side<=1; side++) {
 			uint16_t chord2 = chords[side];
@@ -846,10 +846,10 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 									} else if (side == 0 && keyCode == HID_KEYBOARD_SC_END) {
 										keyCode = HID_KEYBOARD_SC_HOME;
 									}
-									int8_t mouStep = isTick ? 2 : 20;
-									int8_t mouScrollStep = isTick ? 1 : 10;
+									int8_t mouStep = 20;
+									int8_t mouScrollStep = isTick ? 4 : 10;
 									if (Mou_Speed == MOU_PREC) {
-										mouStep = 1;
+										mouStep =  isTick ? 10 : 1;
 										mouScrollStep = 1;
 									}
 									if (Q_Nav == MOU_MODE && keyCode == HID_KEYBOARD_SC_LEFT_ARROW) {
