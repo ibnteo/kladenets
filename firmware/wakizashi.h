@@ -23,58 +23,62 @@ void Ports_Init() {
 }
 
 void LED_On() {
-	PORTD &= ~(1<<5);
+	PORTB &= ~(1<<0);
 }
 void LED_Off() {
-	PORTD |= 1<<5;
+	PORTB |= 1<<0;
 }
 void LED_Toggle() {
-	PORTD ^= 1<<5;
+	PORTB ^= 1<<0;
 }
 void LED_Switch(bool on) {
 	if (on) LED_On(); else LED_Off();
 }
 
 void LED2_On() {
-	PORTB &= ~(1<<0);
+	PORTD &= ~(1<<5);
 }
 void LED2_Off() {
-	PORTB |= 1<<0;
+	PORTD |= 1<<5;
 }
 void LED2_Toggle() {
-	PORTB ^= 1<<0;
+	PORTD ^= 1<<5;
 }
 void LED2_Switch(bool on) {
 	if (on) LED2_On(); else LED2_Off();
 }
 
-
+uint8_t Scan_Tick = 0;
+uint16_t Chords_Scan[2];
 void Keyboard_Scan() {
-	Chords[0] = 0;
-	Chords[1] = 0;
-
-	PORTB &= ~(1<<1); // B1
-	_delay_us(1);
-	if (! (PINF & 1<<7)) Chords[0] |= 1<<0; // F7
-	if (! (PINF & 1<<6)) Chords[0] |= 1<<2; // F6
-	if (! (PINF & 1<<5)) Chords[0] |= 1<<4; // F5
-	if (! (PINF & 1<<4)) Chords[0] |= 1<<6; // F4
-	PORTB |= 1<<1;
-
-	PORTB &= ~(1<<3); // B3
-	_delay_us(1);
-	if (! (PINF & 1<<7)) Chords[0] |= 1<<1; // F7
-	if (! (PINF & 1<<6)) Chords[0] |= 1<<3; // F6
-	if (! (PINF & 1<<5)) Chords[0] |= 1<<5; // F5
-	if (! (PINF & 1<<4)) Chords[0] |= 1<<7; // F4
-	PORTB |= 1<<3;
-
-	PORTB &= ~(1<<2); // B2
-	_delay_us(1);
-	//if (! (PINF & 1<<7)) Chords[0] |= 1<<10; // F7 ???
-	if (! (PINF & 1<<6)) Chords[0] |= 1<<8; // F6
-	if (! (PINF & 1<<5)) Chords[0] |= 1<<9; // F5
-	PORTB |= 1<<2;
-
-	_delay_ms(5);
+	if (Scan_Tick == 0) {
+		Chords_Scan[0] = 0;
+		Chords_Scan[1] = 0;
+		PORTB &= ~(1<<1); // B1
+	} else if (Scan_Tick == 1) {
+		if (! (PINF & 1<<7)) Chords_Scan[0] |= 1<<0; // F7
+		if (! (PINF & 1<<6)) Chords_Scan[0] |= 1<<2; // F6
+		if (! (PINF & 1<<5)) Chords_Scan[0] |= 1<<4; // F5
+		if (! (PINF & 1<<4)) Chords_Scan[0] |= 1<<6; // F4
+		PORTB |= 1<<1;
+		PORTB &= ~(1<<3); // B3
+	} else if (Scan_Tick == 2) {
+		if (! (PINF & 1<<7)) Chords_Scan[0] |= 1<<1; // F7
+		if (! (PINF & 1<<6)) Chords_Scan[0] |= 1<<3; // F6
+		if (! (PINF & 1<<5)) Chords_Scan[0] |= 1<<5; // F5
+		if (! (PINF & 1<<4)) Chords_Scan[0] |= 1<<7; // F4
+		PORTB |= 1<<3;
+		PORTB &= ~(1<<2); // B2
+	} else if (Scan_Tick == 3) {
+		//if (! (PINF & 1<<7)) Chords_Scan[0] |= 1<<10; // F7 ???
+		if (! (PINF & 1<<6)) Chords_Scan[0] |= 1<<8; // F6
+		if (! (PINF & 1<<5)) Chords_Scan[0] |= 1<<9; // F5
+		PORTB |= 1<<2;
+		Chords[0] = Chords_Scan[0];
+		Chords[1] = Chords_Scan[1];
+	}
+	Scan_Tick ++;
+	if (Scan_Tick > 20) { // Scan delay
+		Scan_Tick = 0;
+	}
 }

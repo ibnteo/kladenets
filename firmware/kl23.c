@@ -1,28 +1,25 @@
 /*
 * Project: Chord keyboard Kladenets-23
-* Version: 0.97 (pre release)
-* Date: 2019-06-28
+* Version: 0.98 (pre release)
+* Date: 2019-07-02
 * Author: Vladimir Romanovich <ibnteo@gmail.com>
 * License: MIT
 * https://github.com/ibnteo/kladenets
 */
 
 #include <avr/io.h>
-#include <avr/pgmspace.h>
 #include <avr/eeprom.h>
 #include <avr/interrupt.h>
 #include <avr/wdt.h>
 #include <avr/power.h>
-#include <util/delay.h>
 #include "Descriptors.h"
-#include <LUFA/Drivers/USB/USB.h>
 
 uint16_t Chords[2] = {0, 0};
 // Ports_Init(), LEDs(), Keyboard_Scan()
-#include "microsin162.h"
+//#include "microsin162.h"
 //#include "catboard2.h"
 //#include "promicro.h"
-//#include "wakizashi.h"
+#include "wakizashi.h"
 
 #define LAYER1 0
 #define LAYER2 1
@@ -149,7 +146,7 @@ USB_ClassInfo_HID_Device_t Mouse_HID_Interface =
 void Hardware_Setup()
 {
 	// Set for 16 MHz clock
-	CLKPR = 0x80; CLKPR = 0;
+	//CLKPR = 0x80; CLKPR = 0;
 
 	/* Disable watchdog if enabled by bootloader/fuses */
 	MCUSR &= ~(1 << WDRF);
