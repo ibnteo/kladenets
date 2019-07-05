@@ -1,7 +1,7 @@
 /*
 * Project: Chord keyboard Kladenets-23
 * Version: 0.98 (pre release)
-* Date: 2019-07-02
+* Date: 2019-07-05
 * Author: Vladimir Romanovich <ibnteo@gmail.com>
 * License: MIT
 * https://github.com/ibnteo/kladenets
@@ -16,10 +16,10 @@
 
 uint16_t Chords[2] = {0, 0};
 // Ports_Init(), LEDs(), Keyboard_Scan()
-//#include "microsin162.h"
+#include "microsin162.h"
 //#include "catboard2.h"
 //#include "promicro.h"
-#include "wakizashi.h"
+//#include "wakizashi.h"
 
 #define LAYER1 0
 #define LAYER2 1
@@ -47,8 +47,9 @@ uint8_t Q_Mods = 0;
 uint8_t Q_Nav = NAV_MODE;
 uint8_t Layer_Current = LAYER1;
 
-uint16_t Time_Tick = 0;
+uint16_t Press_Tick = 0;
 uint16_t Chord_Tick = 0;
+uint16_t Release_Tick = 0;
 uint16_t Chords_Last[2] = {0, 0};
 
 // EEPROM Settings
@@ -539,10 +540,16 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 		        uint16_t* const ReportSize)
 {
 
-	if (Time_Tick > 0) {
-		Time_Tick++;
-		if (Time_Tick >= 500) {
-			Time_Tick = 0;
+	if (Press_Tick > 0) {
+		Press_Tick++;
+		if (Press_Tick >= 500) {
+			Press_Tick = 0;
+		}
+	}
+	if (Release_Tick > 0) {
+		Release_Tick++;
+		if (Release_Tick >= 500) {
+			Release_Tick = 0;
 		}
 	}
 
@@ -562,16 +569,19 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 		}
 		bool isRelease = Chords[0] < chords[0] || Chords[1] < chords[1];
 		bool isPress = Chords[0] > chords[0] || Chords[1] > chords[1];
-		bool isTick = Time_Tick > Chord_Tick && Chords[0] == Chords_Last[0] && Chords[1] == Chords_Last[1];
+		bool isTick = Release_Tick && Press_Tick > Chord_Tick && Chords[0] == Chords_Last[0] && Chords[1] == Chords_Last[1];
 		if (isTick) {
-			Time_Tick = Time_Tick - Time_Tick / 8;
+			Press_Tick = Press_Tick - Press_Tick / 8;
+			Release_Tick = 1;
 		}
 		for (uint8_t side=0; side<=1; side++) {
 			uint16_t chord2 = chords[side];
 			uint16_t chord21 = chords[side ? 0 : 1];
 			if (isPress) {
-				if (side) Chord_Growing = true;
-				Time_Tick = 1;
+				if (side) {
+					Chord_Growing = true;
+					Press_Tick = 1;
+				}
 			} else if (isRelease || isTick) {
 				if (Chord_Growing) {
 
@@ -892,11 +902,9 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 							Macros_Buffer[Macros_Index++] = 0;
 							Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_SPACE;
 							Macros_Buffer[Macros_Index++] = 0;
-						} else if (chord2 == 0x180) { // 2 Spaces
+						} else if (chord2 == 0x180) { // Shift+Space
 							Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_SPACE;
-							Macros_Buffer[Macros_Index++] = 0;
-							Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_SPACE;
-							Macros_Buffer[Macros_Index++] = 0;
+							Macros_Buffer[Macros_Index++] = HID_KEYBOARD_MODIFIER_LEFTSHIFT;
 						} else { // Letters
 							uint8_t modsV = 0;
 							uint8_t modsC = 0;
@@ -1028,11 +1036,12 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 						}
 					}
 					if (side && isRelease) {
-						Chord_Tick = Time_Tick + Time_Tick / 2;
+						Chord_Tick = Press_Tick + Press_Tick / 2;
 						if (Chord_Tick < 50) Chord_Tick = 50;
 						Chords_Last[0] = chords[0];
 						Chords_Last[1] = chords[1];
-						Time_Tick = 0;
+						Press_Tick = 0;
+						Release_Tick = 1;
 					}
 					if (side && ! isTick) Chord_Growing = false;
 				}
@@ -1045,8 +1054,8 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 		USB_KeyboardReport_Data_t* KeyboardReport = (USB_KeyboardReport_Data_t*)ReportData;
 
 		if (Macros_Index) {
-			/*if (Time_Tick >= Chord_Tick) {
-				Time_Tick = Chord_Tick / 4;
+			/*if (Press_Tick >= Chord_Tick) {
+				Press_Tick = Chord_Tick / 4;
 			}*/
 			KeyboardReport->KeyCode[0] = (Macros_Buffer[0] == 0xFF ? 0 : Macros_Buffer[0]);
 			KeyboardReport->Modifier = Macros_Buffer[1];
