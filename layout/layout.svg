@@ -53,9 +53,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.49497475"
-     inkscape:cx="-522.61258"
-     inkscape:cy="575.44745"
+     inkscape:zoom="1.979899"
+     inkscape:cx="401.78066"
+     inkscape:cy="625.09316"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -7845,5 +7845,31 @@
          id="tspan7086-6"
          sodipodi:role="line"
          style="font-size:15px">№</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:15px;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="537.90259"
+       y="302.43893"
+       id="text4231-7-2-68-9-7"
+       sodipodi:linespacing="125%"
+       inkscape:export-xdpi="130.32001"
+       inkscape:export-ydpi="130.32001"><tspan
+         sodipodi:role="line"
+         id="tspan4233-5-7-9-62-5"
+         x="537.90259"
+         y="302.43893">пр</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:15px;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="241.66054"
+       y="302.43893"
+       id="text4231-7-2-68-9-7-3"
+       sodipodi:linespacing="125%"
+       inkscape:export-xdpi="130.32001"
+       inkscape:export-ydpi="130.32001"><tspan
+         sodipodi:role="line"
+         id="tspan4233-5-7-9-62-5-5"
+         x="241.66054"
+         y="302.43893">пр</tspan></text>
   </g>
 </svg>
