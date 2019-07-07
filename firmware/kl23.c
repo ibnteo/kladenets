@@ -1,6 +1,6 @@
 /*
 * Project: Chord keyboard Kladenets-23
-* Version: 0.99 (pre release)
+* Version: 0.98 (pre release)
 * Date: 2019-07-07
 * Author: Vladimir Romanovich <ibnteo@gmail.com>
 * License: MIT
@@ -927,12 +927,20 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 									}
 								} else { // Symbols
 									uint8_t symLayer = 0;
-									if (chord1 == 0x1C) {
+									if (chord1 == 0x1C) { // .,
 										symLayer = 1;
-									} else if (chord1 == 0x13) {
+									} else if (chord1 == 0x13) { // ()
 										symLayer = 2;
-									} else if (chord1 == 0x1F) {
+									} else if (chord1 == 0x1F) { // $#
 										symLayer = 3;
+									} else if (Layer_Current == LAYER2 && chord1 == 0x17) { // пр
+										if (isCShift && ! (chord2 & 0x203)) { // CShift
+											modsC = HID_KEYBOARD_MODIFIER_LEFTSHIFT;
+										}
+										Macros_Buffer[Macros_Index++] = HID_KEYBOARD_RU_P;
+										Macros_Buffer[Macros_Index++] = mods | modsC;
+										Macros_Buffer[Macros_Index++] = HID_KEYBOARD_RU_R;
+										Macros_Buffer[Macros_Index++] = mods;
 									}
 									if (symLayer) {
 										uint8_t sym = 0;
@@ -982,9 +990,7 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 											Macros_Buffer[Macros_Index++] = 0;
 										} else if (keyMode == KM_MACROS) {
 										}
-										if (isVowels == 0x100 || (isCShift && isVowels)) {
-											Macros_Buffer[Macros_Index++] = 0xFF;
-											Macros_Buffer[Macros_Index++] = 0;
+										if (isVowels == 0x100 && ! isCShift) {
 											Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_SPACE;
 											Macros_Buffer[Macros_Index++] = 0;
 										}
@@ -1026,9 +1032,7 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 									Macros_Buffer[Macros_Index++] = keyCode;
 									Macros_Buffer[Macros_Index++] = mods | modsV;
 								}
-								if (isCShift) { // VSpace
-									Macros_Buffer[Macros_Index++] = 0xFF;
-									Macros_Buffer[Macros_Index++] = 0;
+								if (isCShift && keyCode != HID_KEYBOARD_SC_SPACE) { // VSpace
 									Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_SPACE;
 									Macros_Buffer[Macros_Index++] = 0;
 								}
