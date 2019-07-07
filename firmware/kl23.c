@@ -1,7 +1,7 @@
 /*
 * Project: Chord keyboard Kladenets-23
-* Version: 0.98 (pre release)
-* Date: 2019-07-05
+* Version: 0.99 (pre release)
+* Date: 2019-07-07
 * Author: Vladimir Romanovich <ibnteo@gmail.com>
 * License: MIT
 * https://github.com/ibnteo/kladenets
@@ -310,23 +310,23 @@ const uint8_t Layer_Consonants[62] PROGMEM = {
 	HID_KEYBOARD_SC_LEFT_SHIFT,	// 1 0101
 	HID_KEYBOARD_SC_LEFT_SHIFT,	// 1 0101
 	0,							// 1 0110 ???
-	HID_KEYBOARD_SC_3_AND_HASHMARK,	// 1 0110 №
+	HID_KEYBOARD_RU_YE,			// 1 0110
 	0,							// 1 0111 ???
 	0,							// 1 0111 ???
 	HID_KEYBOARD_SC_Y,			// 1 1000
 	HID_KEYBOARD_RU_SCH,		// 1 1000
 	0,							// 1 1001 ???
-	0,							// 1 1001 ???
+	HID_KEYBOARD_RU_HARD_SIGN,	// 1 1001
 	HID_KEYBOARD_SC_F,			// 1 1010
 	HID_KEYBOARD_RU_F,			// 1 1010
-	0,							// 1 1011
-	HID_KEYBOARD_RU_YE,			// 1 1011
+	0,							// 1 1011 ???
+	0,							// 1 1011 ???
 	0,							// 1 1100 .,
 	0,							// 1 1100 .,
 	0,							// 1 1101 ???
 	0,							// 1 1101 ???
 	0,							// 1 1110 ???
-	HID_KEYBOARD_RU_HARD_SIGN,	// 1 1110
+	HID_KEYBOARD_SC_3_AND_HASHMARK,	// 1 1110 №
 	0,							// 1 1111 $#
 	0,							// 1 1111 $#
 };
