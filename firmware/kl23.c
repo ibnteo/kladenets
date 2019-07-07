@@ -14,12 +14,29 @@
 #include <avr/power.h>
 #include "Descriptors.h"
 
+void Ports_Init(void);
+void LED_On(void);
+void LED_Off(void);
+void LED_Toggle(void);
+void LED_Switch(bool);
+void LED2_On(void);
+void LED2_Off(void);
+void LED2_Toggle(void);
+void LED2_Switch(bool);
+
+void Keyboard_Scan(void);
+void Settings_Read(void);
+void Settings_Write(void);
+void Layout_Switch(void);
+void Hardware_Setup(void);
+
 uint16_t Chords[2] = {0, 0};
 // Ports_Init(), LEDs(), Keyboard_Scan()
 #include "microsin162.h"
 //#include "catboard2.h"
 //#include "promicro.h"
 //#include "wakizashi.h"
+
 
 #define LAYER1 0
 #define LAYER2 1
@@ -709,7 +726,7 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 								Macros_Buffer[Macros_Index++] = 0;
 							}
 						} else if ((chord & 0x3) && (chord & 0x3) != 0x3 && ! (chord & 0x3C) && (chord & 0xC0)) { // Mods+Vowels
-							uint8_t keyCode;
+							uint8_t keyCode = 0;
 							if ((chord & 0x3) == 0x2) { // Ctrl+[IOA]
 								keyCode = pgm_read_byte(&Layer_Vowels[((chord & 0xC0) >> 5) - 2]);
 							} else if (chord == 0x41) { // Ctrl+H
@@ -990,7 +1007,8 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 											Macros_Buffer[Macros_Index++] = 0;
 										} else if (keyMode == KM_MACROS) {
 										}
-										if (isVowels == 0x100 && ! isCShift) {
+										if (isVowels == 0x100 || (isCShift && isVowels)) {
+										//if (isVowels == 0x100 && ! isCShift) {
 											Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_SPACE;
 											Macros_Buffer[Macros_Index++] = 0;
 										}
