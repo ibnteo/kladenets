@@ -950,6 +950,14 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 										symLayer = 2;
 									} else if (chord1 == 0x1F) { // $#
 										symLayer = 3;
+									} else if (Layer_Current == LAYER1 && chord1 == 0x1B) { // th
+										if (isCShift && ! (chord2 & 0x203)) { // CShift
+											modsC = HID_KEYBOARD_MODIFIER_LEFTSHIFT;
+										}
+										Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_T;
+										Macros_Buffer[Macros_Index++] = mods | modsC;
+										Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_H;
+										Macros_Buffer[Macros_Index++] = mods;
 									} else if (Layer_Current == LAYER2 && chord1 == 0x17) { // пр
 										if (isCShift && ! (chord2 & 0x203)) { // CShift
 											modsC = HID_KEYBOARD_MODIFIER_LEFTSHIFT;

@@ -53,9 +53,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="3.959798"
-     inkscape:cx="463.02976"
-     inkscape:cy="435.97587"
+     inkscape:zoom="2.8"
+     inkscape:cx="396.812"
+     inkscape:cy="828.79379"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -7871,5 +7871,31 @@
          id="tspan4233-5-7-9-62-5-5"
          x="241.66054"
          y="302.43893">пр</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:15px;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="559.01471"
+       y="206.92157"
+       id="text4231-7-2-68-9-7-36"
+       sodipodi:linespacing="125%"
+       inkscape:export-xdpi="130.32001"
+       inkscape:export-ydpi="130.32001"><tspan
+         sodipodi:role="line"
+         id="tspan4233-5-7-9-62-5-7"
+         x="559.01471"
+         y="206.92157">th</tspan></text>
+    <text
+       inkscape:export-ydpi="130.32001"
+       inkscape:export-xdpi="130.32001"
+       sodipodi:linespacing="125%"
+       id="text5277"
+       y="206.92157"
+       x="214.37186"
+       style="font-style:normal;font-weight:normal;font-size:15px;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         y="206.92157"
+         x="214.37186"
+         id="tspan5279"
+         sodipodi:role="line">th</tspan></text>
   </g>
 </svg>
