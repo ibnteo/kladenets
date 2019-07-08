@@ -53,9 +53,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1.979899"
-     inkscape:cx="401.78066"
-     inkscape:cy="625.09316"
+     inkscape:zoom="3.959798"
+     inkscape:cx="463.02976"
+     inkscape:cy="435.97587"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -4275,8 +4275,8 @@
          style="font-size:6.25px;text-align:center;text-anchor:middle">Esc</tspan></text>
     <text
        xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:sans-serif;text-align:end;letter-spacing:0px;word-spacing:0px;text-anchor:end;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       x="531.34424"
+       style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:sans-serif;text-align:end;letter-spacing:0px;word-spacing:0px;text-anchor:end;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;"
+       x="545.73889"
        y="647.32153"
        id="text8199-9"
        sodipodi:linespacing="125%"
@@ -4284,35 +4284,35 @@
        inkscape:export-ydpi="130"><tspan
          sodipodi:role="line"
          id="tspan8201-1"
-         x="531.34424"
+         x="545.73889"
          y="647.32153"
-         style="font-size:6.25px;text-align:end;text-anchor:end">PgUp</tspan></text>
+         style="font-size:6.25px;text-align:end;text-anchor:end;">PgUp</tspan></text>
     <text
        sodipodi:linespacing="125%"
        id="text8229"
        y="647.32153"
-       x="486.73376"
-       style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:sans-serif;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="557.19189"
+       style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:sans-serif;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;"
        xml:space="preserve"
        inkscape:export-xdpi="130"
        inkscape:export-ydpi="130"><tspan
-         style="font-size:6.25px;text-align:start;text-anchor:start"
+         style="font-size:6.25px;text-align:start;text-anchor:start;"
          y="647.32153"
-         x="486.73376"
+         x="557.19189"
          id="tspan8231"
          sodipodi:role="line">PgDn</tspan></text>
     <text
        sodipodi:linespacing="125%"
        id="text8233"
        y="647.32153"
-       x="567.16345"
+       x="523.97943"
        style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:sans-serif;text-align:end;letter-spacing:0px;word-spacing:0px;text-anchor:end;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        xml:space="preserve"
        inkscape:export-xdpi="130"
        inkscape:export-ydpi="130"><tspan
          style="font-size:6.25px;text-align:end;text-anchor:end"
          y="647.32153"
-         x="567.16345"
+         x="523.97943"
          id="tspan8235"
          sodipodi:role="line">Ins</tspan></text>
     <text
