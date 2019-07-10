@@ -1165,10 +1165,6 @@ int main(void) {
 	Hardware_Setup();
 	GlobalInterruptEnable();
 	Settings_Read();
-
-	//Layout_Mode = LAYOUTS_TWO;
-	//OS_Mode = OS_LINUX;
-	//Settings_Write();
 	while (true) {
 		HID_Device_USBTask(&Keyboard_HID_Interface);
 		HID_Device_USBTask(&Mouse_HID_Interface);
