@@ -32,10 +32,11 @@ void Hardware_Setup(void);
 
 uint16_t Chords[2] = {0, 0};
 // Ports_Init(), LEDs(), Keyboard_Scan()
-#include "microsin162.h"
+//#include "microsin162.h"
 //#include "catboard2.h"
 //#include "promicro.h"
 //#include "wakizashi.h"
+#include "accordionum.h"
 
 
 #define LAYER1 0
@@ -1164,6 +1165,10 @@ int main(void) {
 	Hardware_Setup();
 	GlobalInterruptEnable();
 	Settings_Read();
+
+	//Layout_Mode = LAYOUTS_TWO;
+	//OS_Mode = OS_LINUX;
+	//Settings_Write();
 	while (true) {
 		HID_Device_USBTask(&Keyboard_HID_Interface);
 		HID_Device_USBTask(&Mouse_HID_Interface);
