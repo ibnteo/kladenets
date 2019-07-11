@@ -32,12 +32,11 @@ void Hardware_Setup(void);
 
 uint16_t Chords[2] = {0, 0};
 // Ports_Init(), LEDs(), Keyboard_Scan()
-//#include "microsin162.h"
+#include "microsin162.h"
 //#include "catboard2.h"
 //#include "promicro.h"
 //#include "wakizashi.h"
-#include "accordionum.h"
-
+//#include "accordionum.h"
 
 #define LAYER1 0
 #define LAYER2 1
@@ -344,7 +343,7 @@ const uint8_t Layer_Consonants[62] PROGMEM = {
 	0,							// 1 1101 ???
 	0,							// 1 1101 ???
 	0,							// 1 1110 ???
-	HID_KEYBOARD_SC_3_AND_HASHMARK,	// 1 1110 №
+	0,							// 1 1110 ???
 	0,							// 1 1111 $#
 	0,							// 1 1111 $#
 };
@@ -937,9 +936,6 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 										if (isCShift && ! (chord2 & 0x203)) { // CShift
 											modsC = HID_KEYBOARD_MODIFIER_LEFTSHIFT;
 										}
-										if (keyCode == HID_KEYBOARD_SC_3_AND_HASHMARK) { // №
-											mods = HID_KEYBOARD_MODIFIER_LEFTSHIFT;
-										}
 										Macros_Buffer[Macros_Index++] = keyCode;
 										Macros_Buffer[Macros_Index++] = mods | modsC;
 									}
@@ -959,6 +955,14 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 										Macros_Buffer[Macros_Index++] = mods | modsC;
 										Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_H;
 										Macros_Buffer[Macros_Index++] = mods;
+									} else if (Layer_Current == LAYER2 && chord1 == 0x1B) { // ст
+										if (isCShift && ! (chord2 & 0x203)) { // CShift
+											modsC = HID_KEYBOARD_MODIFIER_LEFTSHIFT;
+										}
+										Macros_Buffer[Macros_Index++] = HID_KEYBOARD_RU_S;
+										Macros_Buffer[Macros_Index++] = mods | modsC;
+										Macros_Buffer[Macros_Index++] = HID_KEYBOARD_RU_T;
+										Macros_Buffer[Macros_Index++] = mods;
 									} else if (Layer_Current == LAYER2 && chord1 == 0x17) { // пр
 										if (isCShift && ! (chord2 & 0x203)) { // CShift
 											modsC = HID_KEYBOARD_MODIFIER_LEFTSHIFT;
@@ -966,6 +970,22 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 										Macros_Buffer[Macros_Index++] = HID_KEYBOARD_RU_P;
 										Macros_Buffer[Macros_Index++] = mods | modsC;
 										Macros_Buffer[Macros_Index++] = HID_KEYBOARD_RU_R;
+										Macros_Buffer[Macros_Index++] = mods;
+									} else if (Layer_Current == LAYER2 && chord1 == 0x1D) { // тр
+										if (isCShift && ! (chord2 & 0x203)) { // CShift
+											modsC = HID_KEYBOARD_MODIFIER_LEFTSHIFT;
+										}
+										Macros_Buffer[Macros_Index++] = HID_KEYBOARD_RU_T;
+										Macros_Buffer[Macros_Index++] = mods | modsC;
+										Macros_Buffer[Macros_Index++] = HID_KEYBOARD_RU_R;
+										Macros_Buffer[Macros_Index++] = mods;
+									} else if (Layer_Current == LAYER2 && chord1 == 0x1E) { // нн
+										if (isCShift && ! (chord2 & 0x203)) { // CShift
+											modsC = HID_KEYBOARD_MODIFIER_LEFTSHIFT;
+										}
+										Macros_Buffer[Macros_Index++] = HID_KEYBOARD_RU_N;
+										Macros_Buffer[Macros_Index++] = mods | modsC;
+										Macros_Buffer[Macros_Index++] = HID_KEYBOARD_RU_N;
 										Macros_Buffer[Macros_Index++] = mods;
 									}
 									if (symLayer) {
