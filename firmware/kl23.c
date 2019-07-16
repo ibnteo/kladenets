@@ -1,7 +1,7 @@
 /*
 * Project: Chord keyboard Kladenets-23
 * Version: 0.98 (pre release)
-* Date: 2019-07-07
+* Date: 2019-07-16
 * Author: Vladimir Romanovich <ibnteo@gmail.com>
 * License: MIT
 * https://github.com/ibnteo/kladenets
@@ -22,7 +22,7 @@ void LED_Switch(bool);
 void LED2_On(void);
 void LED2_Off(void);
 void LED2_Toggle(void);
-void LED2_Switch(bool);up
+void LED2_Switch(bool);
 
 void Keyboard_Scan(void);
 void Settings_Read(void);
@@ -762,7 +762,10 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 									mods = Meta;
 								}
 								Q_Mods = 0;
-								if (chord == 0x70) { // Mod+,
+								if (chord == 0x70) { // Mod+.
+									Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_DOT_AND_GREATER_THAN_SIGN;
+									Macros_Buffer[Macros_Index++] = mods;
+								} else if (chord == 0x72) { // Mod+,
 									Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_COMMA_AND_LESS_THAN_SIGN;
 									Macros_Buffer[Macros_Index++] = mods;
 								} else if (chord == 0x71) { // Mod+;
