@@ -591,7 +591,6 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 			Press_Tick = Press_Tick - Press_Tick / 8;
 			Release_Tick = 1;
 		}
-		//uint8_t layer = Layer_Current;
 		for (uint8_t side=0; side<=1; side++) {
 			uint16_t chord2 = chords[side];
 			uint16_t chord21 = chords[side ? 0 : 1];
@@ -614,6 +613,15 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 							Layout_Switch();
 						}
 					}
+					if (chord21 == 0x200 && ! (chord2 & 0x100) && (chord2 & 0xFF)) { // Additional Nav
+						chord2 |= chord21;
+					} else if ((chord21 & ~0xC0) == 0x203 && ! (chord2 & 0x203) && (chord2 & 0xFC)) { // Additional Num
+						chord2 |= chord21;
+					} else if ((chord21 & ~0x3) == 0x2C0 && ! (chord2 & 0x2C0) && (chord2 & 0x3F)) { // Additional Func
+						chord2 |= chord21;
+					} else if (side == 1 && (chord21 == 0xCC || chord21 == 0xF0 || chord21 == 0xFC) && (chord2 & 0x303) && ! (chord2 & ~0x303) && (chord2 & ~0x300) != 0x200) { // Additional Sym
+						chord2 |= chord21 & ~0x80;
+					} 
 
 					if (Settings_Side && (Settings_Side - 1) == side) { // Settings
 						Settings_Side = 0;
@@ -634,6 +642,10 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 					} else if ((Chords_Last[side] == 0x299 && chords[side] == 0x266) || (Chords_Last[side] == 0x266 && chords[side] == 0x299)) { // Settings
 						Settings_Side = side + 1;
 						LED_Toggle();
+					} else if (chord2 == 0x200 && ! (chord21 & 0x100) && (chord21 & 0xFF)) { // Additional Nav
+					} else if ((chord2 & ~0xC0) == 0x203 && ! (chord21 & 0x203) && (chord21 & 0xFC)) { // Additional Num
+					} else if ((chord2 & ~0x3) == 0x2C0 && ! (chord21 & 0x2C0) && (chord21 & 0x3F)) { // Additional Func
+					} else if (side == 0 && (chord2 == 0xCC || chord2 == 0xF0 || chord2 == 0xFC) && (chord21 & 0x303) && ! (chord21 & ~0x303) && (chord21 & ~0x300) != 0x200) { // Additional Sym
 					} else if ((chord2 == 0x200 || chord2 == 0x80) && ! chord21) { // Layer change
 						if (Layout_Mode == LAYOUTS_TWO) {
 							layer = LAYER1;
@@ -811,7 +823,7 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 									mods = HID_KEYBOARD_MODIFIER_LEFTALT | HID_KEYBOARD_MODIFIER_LEFTCTRL;
 									Macros_Buffer[Macros_Index++] = 0;
 									Macros_Buffer[Macros_Index++] = mods;
-									if (! chord21) Q_Mods = mods;
+									if (! (chord21 & ~0x200)) Q_Mods = mods;
 								} else if (chord == 0x2C) { // Alt+Tab
 									mods = HID_KEYBOARD_MODIFIER_LEFTALT;
 									Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_TAB;
@@ -876,7 +888,7 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 							} else {
 								if (keyCode >= HID_KEYBOARD_SC_LEFT_CONTROL && keyCode <= HID_KEYBOARD_SC_RIGHT_GUI) {
 									mods ^= 1 << (keyCode - HID_KEYBOARD_SC_LEFT_CONTROL);
-									if (! chord21) Q_Mods = mods;
+									if (! (chord21 & ~0x200)) Q_Mods = mods;
 								} else {
 									if (side == 0 && keyCode == HID_KEYBOARD_SC_LEFT_ARROW) {
 										keyCode = HID_KEYBOARD_SC_RIGHT_ARROW;
@@ -1104,7 +1116,8 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 						}
 					}
 					if (side && isRelease) {
-						Chord_Tick = Press_Tick + Press_Tick / 2;
+						//Chord_Tick = Press_Tick + Press_Tick / 2;
+						Chord_Tick = Press_Tick + Press_Tick;
 						if (Chord_Tick < 50) Chord_Tick = 50;
 						Chords_Last[0] = chords[0];
 						Chords_Last[1] = chords[1];
