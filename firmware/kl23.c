@@ -1,7 +1,7 @@
 /*
 * Project: Chord keyboard Kladenets-23
 * Version: 0.98 (pre release)
-* Date: 2019-07-16
+* Date: 2019-07-20
 * Author: Vladimir Romanovich <ibnteo@gmail.com>
 * License: MIT
 * https://github.com/ibnteo/kladenets
@@ -591,6 +591,7 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 			Press_Tick = Press_Tick - Press_Tick / 8;
 			Release_Tick = 1;
 		}
+		//uint8_t layer = Layer_Current;
 		for (uint8_t side=0; side<=1; side++) {
 			uint16_t chord2 = chords[side];
 			uint16_t chord21 = chords[side ? 0 : 1];
@@ -601,6 +602,18 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 				}
 			} else if (isRelease || isTick) {
 				if (Chord_Growing) {
+
+					uint8_t layer = Layer_Current;
+
+					if (Layout_Mode == LAYOUTS_TWO && (chord21 == 0x200 || chord21 == 0x80) && chord2 != 0 && chord2 != 0x200 && chord2 != 0x80) { // Temporary layer change
+						if (chord21 == 0x200 && Layer_Current == LAYER2) {
+							layer = LAYER1;
+							Layout_Switch();
+						} else if (chord21 == 0x80 && Layer_Current == LAYER1) {
+							layer = LAYER2;
+							Layout_Switch();
+						}
+					}
 
 					if (Settings_Side && (Settings_Side - 1) == side) { // Settings
 						Settings_Side = 0;
@@ -621,18 +634,19 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 					} else if ((Chords_Last[side] == 0x299 && chords[side] == 0x266) || (Chords_Last[side] == 0x266 && chords[side] == 0x299)) { // Settings
 						Settings_Side = side + 1;
 						LED_Toggle();
-					} else if (chord2 == 0x200 || chord2 == 0x80) { // Layer change
+					} else if ((chord2 == 0x200 || chord2 == 0x80) && ! chord21) { // Layer change
 						if (Layout_Mode == LAYOUTS_TWO) {
-							uint8_t newLayer = LAYER1;
+							layer = LAYER1;
 							if (chord2 == 0x80) {
-								newLayer = LAYER2;
+								layer = LAYER2;
 							}
-							if (Layer_Current != newLayer) {
+							if (Layer_Current != layer) {
 								Layout_Switch();
-								Layer_Current = newLayer;
-								LED_Switch(newLayer == LAYER2);
+								Layer_Current = layer;
+								LED_Switch(Layer_Current == LAYER2);
 							}
 						}
+					} else if (chord2 == 0x200 || chord2 == 0x80) {
 					} else if ((chord2 & 0x300) == 0x200) { // Quasi
 						uint8_t chord = chord2;
 						if (chord == 0x80) { // Enter
@@ -710,10 +724,10 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 									} else if (keyCode == HID_KEYBOARD_SC_BACKSLASH_AND_PIPE) { // * 8
 										keyCode = HID_KEYBOARD_SC_8_AND_ASTERISK;
 										mods = HID_KEYBOARD_MODIFIER_LEFTSHIFT;
-									} else if (keyCode == HID_KEYBOARD_SC_SLASH_AND_QUESTION_MARK && Layer_Current == LAYER2) { // / Rus
+									} else if (keyCode == HID_KEYBOARD_SC_SLASH_AND_QUESTION_MARK && layer == LAYER2) { // / Rus
 										keyCode = HID_KEYBOARD_SC_BACKSLASH_AND_PIPE;
 										mods = HID_KEYBOARD_MODIFIER_LEFTSHIFT;
-									} else if (keyCode == HID_KEYBOARD_SC_DOT_AND_GREATER_THAN_SIGN && Layer_Current == LAYER2) { // , Rus
+									} else if (keyCode == HID_KEYBOARD_SC_DOT_AND_GREATER_THAN_SIGN && layer == LAYER2) { // , Rus
 										keyCode = HID_KEYBOARD_SC_SLASH_AND_QUESTION_MARK;
 										mods = HID_KEYBOARD_MODIFIER_LEFTSHIFT;
 									}
@@ -931,7 +945,7 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 							if (isConsonants) { // Consonants
 								uint8_t chord1 = chord2;
 								chord1 = (chord1 >> 2) & ~0x20;
-								uint8_t keyCode = pgm_read_byte(&Layer_Consonants[Layer_Current ? (chord1 << 1) - 1 : (chord1 << 1) - 2]);
+								uint8_t keyCode = pgm_read_byte(&Layer_Consonants[layer ? (chord1 << 1) - 1 : (chord1 << 1) - 2]);
 								if (keyCode) {
 									if (keyCode == HID_KEYBOARD_SC_LEFT_SHIFT) {
 										modsV = HID_KEYBOARD_MODIFIER_LEFTSHIFT;
@@ -950,7 +964,7 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 										symLayer = 2;
 									} else if (chord1 == 0x1F) { // $#
 										symLayer = 3;
-									} else if (Layer_Current == LAYER1 && chord1 == 0x1B) { // th
+									} else if (layer == LAYER1 && chord1 == 0x1B) { // th
 										if (isCShift && ! (chord2 & 0x203)) { // CShift
 											modsC = HID_KEYBOARD_MODIFIER_LEFTSHIFT;
 										}
@@ -958,7 +972,7 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 										Macros_Buffer[Macros_Index++] = mods | modsC;
 										Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_H;
 										Macros_Buffer[Macros_Index++] = mods;
-									} else if (Layer_Current == LAYER2 && chord1 == 0x1B) { // ст
+									} else if (layer == LAYER2 && chord1 == 0x1B) { // ст
 										if (isCShift && ! (chord2 & 0x203)) { // CShift
 											modsC = HID_KEYBOARD_MODIFIER_LEFTSHIFT;
 										}
@@ -966,7 +980,7 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 										Macros_Buffer[Macros_Index++] = mods | modsC;
 										Macros_Buffer[Macros_Index++] = HID_KEYBOARD_RU_T;
 										Macros_Buffer[Macros_Index++] = mods;
-									} else if (Layer_Current == LAYER2 && chord1 == 0x17) { // пр
+									} else if (layer == LAYER2 && chord1 == 0x17) { // пр
 										if (isCShift && ! (chord2 & 0x203)) { // CShift
 											modsC = HID_KEYBOARD_MODIFIER_LEFTSHIFT;
 										}
@@ -974,7 +988,7 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 										Macros_Buffer[Macros_Index++] = mods | modsC;
 										Macros_Buffer[Macros_Index++] = HID_KEYBOARD_RU_R;
 										Macros_Buffer[Macros_Index++] = mods;
-									} else if (Layer_Current == LAYER2 && chord1 == 0x1D) { // тр
+									} else if (layer == LAYER2 && chord1 == 0x1D) { // тр
 										if (isCShift && ! (chord2 & 0x203)) { // CShift
 											modsC = HID_KEYBOARD_MODIFIER_LEFTSHIFT;
 										}
@@ -982,7 +996,7 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 										Macros_Buffer[Macros_Index++] = mods | modsC;
 										Macros_Buffer[Macros_Index++] = HID_KEYBOARD_RU_R;
 										Macros_Buffer[Macros_Index++] = mods;
-									} else if (Layer_Current == LAYER2 && chord1 == 0x1E) { // нн
+									} else if (layer == LAYER2 && chord1 == 0x1E) { // нн
 										if (isCShift && ! (chord2 & 0x203)) { // CShift
 											modsC = HID_KEYBOARD_MODIFIER_LEFTSHIFT;
 										}
@@ -1003,7 +1017,7 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 										else if (chord12 == 0x301) sym = 7;
 										else if (chord12 == 0x302) sym = 8;
 										sym = sym << 2; // * 4
-										if (Layer_Current == LAYER2) {
+										if (layer == LAYER2) {
 											sym += 2;
 										}
 										uint8_t keyCode = pgm_read_byte(&Layer_Sym[symLayer - 1][sym]);
@@ -1054,8 +1068,8 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 								if ((chord1 & 0xC) == 0xC) {
 									chord1 = chord1 & 0xB;
 								}
-								uint8_t keyCode = pgm_read_byte(&Layer_Vowels[Layer_Current ? (chord1 << 1) - 1 : (chord1 << 1) - 2]);
-								if (! keyCode && Layer_Current == LAYER1) {
+								uint8_t keyCode = pgm_read_byte(&Layer_Vowels[layer ? (chord1 << 1) - 1 : (chord1 << 1) - 2]);
+								if (! keyCode && layer == LAYER1) {
 									if (chord1 == 0b00001010) { // ou
 										Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_O;
 										Macros_Buffer[Macros_Index++] = 0;
@@ -1098,6 +1112,10 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 						Release_Tick = 1;
 					}
 					if (side && ! isTick) Chord_Growing = false;
+
+					if (Layer_Current != layer) {
+						Layout_Switch();
+					}
 				}
 			}
 		}
