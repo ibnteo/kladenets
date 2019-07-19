@@ -1,6 +1,6 @@
 /*
 * Project: Chord keyboard Kladenets-23
-* Version: 0.98 (pre release)
+* Version: 0.99 (pre release)
 * Date: 2019-07-20
 * Author: Vladimir Romanovich <ibnteo@gmail.com>
 * License: MIT
@@ -874,12 +874,12 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 									Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_DOWN_ARROW;
 									Macros_Buffer[Macros_Index++] = mods;
 									Q_Mods = 0;
-								} else if (chord == 0x16) { // Ctrl+Left
+								} else if ((side == 0 && chord == 0x25) || (side == 1 && chord == 0x16)) { // Ctrl+Left
 									mods = HID_KEYBOARD_MODIFIER_LEFTCTRL;
 									Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_LEFT_ARROW;
 									Macros_Buffer[Macros_Index++] = mods;
 									Q_Mods = 0;
-								} else if (chord == 0x25) { // Ctrl+Right
+								} else if ((side == 1 && chord == 0x25) || (side == 0 && chord == 0x16)) { // Ctrl+Right
 									mods = HID_KEYBOARD_MODIFIER_LEFTCTRL;
 									Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_RIGHT_ARROW;
 									Macros_Buffer[Macros_Index++] = mods;
