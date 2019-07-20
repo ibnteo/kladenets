@@ -613,9 +613,7 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 							Layout_Switch();
 						}
 					}
-					if (chord21 == 0x200 && ! (chord2 & 0x100) && (chord2 & 0xFF)) { // Additional Nav
-						chord2 |= chord21;
-					} else if ((chord21 & ~0xC0) == 0x203 && ! (chord2 & 0x203) && (chord2 & 0xFC)) { // Additional Num
+					if ((chord21 & ~0xC0) == 0x203 && ! (chord2 & 0x203) && (chord2 & 0xFC)) { // Additional Num
 						chord2 |= chord21;
 					} else if ((chord21 & ~0x3) == 0x2C0 && ! (chord2 & 0x2C0) && (chord2 & 0x3F)) { // Additional Func
 						chord2 |= chord21;
@@ -642,7 +640,6 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 					} else if ((Chords_Last[side] == 0x299 && chords[side] == 0x266) || (Chords_Last[side] == 0x266 && chords[side] == 0x299)) { // Settings
 						Settings_Side = side + 1;
 						LED_Toggle();
-					} else if (chord2 == 0x200 && ! (chord21 & 0x100) && (chord21 & 0xFF)) { // Additional Nav
 					} else if ((chord2 & ~0xC0) == 0x203 && ! (chord21 & 0x203) && (chord21 & 0xFC)) { // Additional Num
 					} else if ((chord2 & ~0x3) == 0x2C0 && ! (chord21 & 0x2C0) && (chord21 & 0x3F)) { // Additional Func
 					} else if (side == 0 && (chord2 == 0xCC || chord2 == 0xF0 || chord2 == 0xFC) && (chord21 & 0x303) && ! (chord21 & ~0x303) && (chord21 & ~0x300) != 0x200) { // Additional Sym
