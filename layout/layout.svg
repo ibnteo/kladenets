@@ -53,9 +53,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1.4"
-     inkscape:cx="395.44009"
-     inkscape:cy="529.31681"
+     inkscape:zoom="1.979899"
+     inkscape:cx="334.00659"
+     inkscape:cy="684.33678"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -915,7 +915,7 @@
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:20px;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       x="525.09192"
+       x="607.92438"
        y="516.29248"
        id="text4231-7-2-54-41"
        sodipodi:linespacing="125%"
@@ -923,13 +923,13 @@
        inkscape:export-ydpi="130.32001"><tspan
          sodipodi:role="line"
          id="tspan4233-5-7-7-859"
-         x="525.09192"
+         x="607.92438"
          y="516.29248"
          style="font-size:20px">ч</tspan></text>
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:20px;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       x="608.26947"
+       x="524.42682"
        y="516.29248"
        id="text4231-7-2-54-33"
        sodipodi:linespacing="125%"
@@ -937,7 +937,7 @@
        inkscape:export-ydpi="130.32001"><tspan
          sodipodi:role="line"
          id="tspan4233-5-7-7-38"
-         x="608.26947"
+         x="524.42682"
          y="516.29248"
          style="font-size:20px">х</tspan></text>
     <text
@@ -1862,12 +1862,12 @@
        sodipodi:linespacing="125%"
        id="text8449"
        y="265.56158"
-       x="521.14758"
+       x="606.50549"
        style="font-style:normal;font-weight:normal;font-size:20px;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        xml:space="preserve"><tspan
          style="font-size:20px"
          y="265.56158"
-         x="521.14758"
+         x="606.50549"
          id="tspan8451"
          sodipodi:role="line">k</tspan></text>
     <text
@@ -1876,12 +1876,12 @@
        sodipodi:linespacing="125%"
        id="text8461"
        y="265.56158"
-       x="606.12665"
+       x="523.29419"
        style="font-style:normal;font-weight:normal;font-size:20px;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        xml:space="preserve"><tspan
          style="font-size:20px"
          y="265.56158"
-         x="606.12665"
+         x="523.29419"
          id="tspan8463"
          sodipodi:role="line">x</tspan></text>
     <text
@@ -3577,7 +3577,7 @@
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:20px;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       x="251.32452"
+       x="165.46156"
        y="266.38043"
        id="text9098"
        sodipodi:linespacing="125%"
@@ -3585,7 +3585,7 @@
        inkscape:export-ydpi="130.32001"><tspan
          sodipodi:role="line"
          id="tspan9100"
-         x="251.32452"
+         x="165.46156"
          y="266.38043"
          style="font-size:20px">k</tspan></text>
     <text
@@ -3604,7 +3604,7 @@
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:20px;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       x="166.18822"
+       x="250.53595"
        y="266.38043"
        id="text9110"
        sodipodi:linespacing="125%"
@@ -3612,7 +3612,7 @@
        inkscape:export-ydpi="130.32001"><tspan
          sodipodi:role="line"
          id="tspan9112"
-         x="166.18822"
+         x="250.53595"
          y="266.38043"
          style="font-size:20px">x</tspan></text>
     <text
@@ -3751,7 +3751,7 @@
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:20px;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       x="247.49046"
+       x="166.67825"
        y="517.73193"
        id="text4231-7-2-54-41-6"
        sodipodi:linespacing="125%"
@@ -3759,13 +3759,13 @@
        inkscape:export-ydpi="130.32001"><tspan
          sodipodi:role="line"
          id="tspan4233-5-7-7-859-4"
-         x="247.49046"
+         x="166.67825"
          y="517.73193"
          style="font-size:20px">ч</tspan></text>
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:20px;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       x="164.01994"
+       x="250.89307"
        y="517.73193"
        id="text4231-7-2-54-33-0"
        sodipodi:linespacing="125%"
@@ -3773,7 +3773,7 @@
        inkscape:export-ydpi="130.32001"><tspan
          sodipodi:role="line"
          id="tspan4233-5-7-7-38-0"
-         x="164.01994"
+         x="250.89307"
          y="517.73193"
          style="font-size:20px">х</tspan></text>
     <text
