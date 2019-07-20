@@ -573,8 +573,6 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 	if (Macros_Index < (MACROS_BUFFER_SIZE - MACROS_BUFFER_MAX)) {
 
 
-		uint8_t mods = Q_Mods;
-
 		uint16_t chords[2] = {Chords[0], Chords[1]};
 		Keyboard_Scan();
 
@@ -592,6 +590,7 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 			Release_Tick = 1;
 		}
 		for (uint8_t side=0; side<=1; side++) {
+			uint8_t mods = Q_Mods;
 			uint16_t chord2 = chords[side];
 			uint16_t chord21 = chords[side ? 0 : 1];
 			if (isPress) {
