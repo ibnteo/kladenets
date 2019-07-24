@@ -637,9 +637,9 @@
 		typedef struct
 		{
 			uint8_t Button; /**< Button mask for currently pressed buttons in the mouse. */
-			int8_t  X; /**< Current delta X movement of the mouse. */
-			int8_t  Y; /**< Current delta Y movement on the mouse. */
-			int8_t  W; /**< Current delta Wheel movement on the mouse. */
+			int16_t  X; /**< Current delta X movement of the mouse. */
+			int16_t  Y; /**< Current delta Y movement on the mouse. */
+			int16_t  W; /**< Current delta Wheel movement on the mouse. */
 		} ATTR_PACKED USB_MouseReport_Data_t;
 
 		/** \brief Standard HID Boot Protocol Keyboard Report.
