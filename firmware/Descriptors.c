@@ -55,7 +55,7 @@ const USB_Descriptor_HIDReport_Datatype_t PROGMEM MouseReport[] =
 	 *   Buttons: 3
 	 *   Absolute screen coordinates: false
 	 */
-	HID_DESCRIPTOR_MOUSE(-1000, 1000, -1, 1, 3, false)
+	HID_DESCRIPTOR_MOUSE(-128, 127, -1, 1, 3, false)
 };
 
 /** Same as the MouseReport structure, but defines the keyboard HID interface's report structure. */

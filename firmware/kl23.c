@@ -1,7 +1,7 @@
 /*
 * Project: Chord keyboard Kladenets-23
-* Version: 1.1
-* Date: 2019-07-24
+* Version: 1.2
+* Date: 2019-08-02
 * Author: Vladimir Romanovich <ibnteo@gmail.com>
 * License: MIT
 * https://github.com/ibnteo/kladenets
@@ -571,6 +571,13 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 			uint8_t mods = Q_Mods;
 			uint16_t chord2 = chords[side];
 			uint16_t chord21 = chords[side ? 0 : 1];
+			if ((chord21 & 0x300) == 0x200 && (chord21 & 0x3F) && ! (chord21 &0xC0)) { // Modificators
+				uint8_t chord = chord21;
+				uint8_t keyCode = pgm_read_byte(&Layer_NavMou[(chord & 0x3F) - 1]);
+				if (keyCode >= HID_KEYBOARD_SC_LEFT_CONTROL && keyCode <= HID_KEYBOARD_SC_RIGHT_GUI) {
+					mods ^= 1 << (keyCode - HID_KEYBOARD_SC_LEFT_CONTROL);
+				}
+			}
 			if (isPress) {
 				if (side) {
 					Chord_Growing = true;
@@ -591,7 +598,7 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 					}
 					if ((chord21 & ~0xC0) == 0x203 && ! (chord2 & 0x203) && (chord2 & 0xFC)) { // Additional Num
 						chord2 |= chord21;
-					} else if ((chord21 & ~0x3) == 0x2C0 && ! (chord2 & 0x2C0) && (chord2 & 0x3F)) { // Additional Func
+					} else if ((chord21 & ~0x1) == 0x2C2 && ! (chord2 & 0x2C0) && (chord2 & 0x3F)) { // Additional Func
 						chord2 |= chord21;
 					} else if (side == 1 && (chord21 == 0xCC || chord21 == 0xF0 || chord21 == 0xFC) && (chord2 & 0x303) && ! (chord2 & ~0x303) && (chord2 & ~0x300) != 0x200) { // Additional Sym
 						chord2 |= chord21 & ~0x80;
@@ -599,7 +606,7 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 
 					if (Settings_Side && (Settings_Side - 1) == side) { // Settings
 						Settings_Side = 0;
-						uint8_t chord = chord2;
+						uint8_t chord = chord2; // ! uint16_t => uint8_t !
 						if (! (chord2 & ~0x13F)) {
 							if (chord & 0x3) {
 								Layout_Mode = (chord & 0x3) - 1;
@@ -617,12 +624,12 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 						Settings_Side = side + 1;
 						LED_Toggle();
 					} else if ((chord2 & ~0xC0) == 0x203 && ! (chord21 & 0x203) && (chord21 & 0xFC)) { // Additional Num
-					} else if ((chord2 & ~0x3) == 0x2C0 && ! (chord21 & 0x2C0) && (chord21 & 0x3F)) { // Additional Func
+					} else if ((chord2 & ~0x1) == 0x2C2 && ! (chord21 & 0x2C0) && (chord21 & 0x3F)) { // Additional Func
 					} else if (side == 0 && (chord2 == 0xCC || chord2 == 0xF0 || chord2 == 0xFC) && (chord21 & 0x303) && ! (chord21 & ~0x303) && (chord21 & ~0x300) != 0x200) { // Additional Sym
-					} else if ((chord2 == 0x200 || chord2 == 0x80) && ! chord21) { // Layer change
+					} else if ((chord2 == 0x180) && ! chord21) { // Layer change
 						if (Layout_Mode == LAYOUTS_TWO) {
 							layer = LAYER1;
-							if (chord2 == 0x80) {
+							if (Chords[side] == 0x100) {
 								layer = LAYER2;
 							}
 							if (Layer_Current != layer) {
@@ -631,7 +638,7 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 								LED_Switch(Layer_Current == LAYER2);
 							}
 						}
-					} else if (chord2 == 0x200 || chord2 == 0x80) {
+					} else if (chord2 == 0x180) {
 					} else if ((chord2 & 0x300) == 0x200) { // Quasi
 						uint8_t multiplier = Q_Multiplier;
 						if ((chord21 & 0x3C) && ! (chord21 & ~0x3C)) {
@@ -668,14 +675,14 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 							uint8_t keyCode = pgm_read_byte(&Layer_Func[(chord1 & 0xF) - 1]);
 							if (chord == 0xFF) { // Q_Multiplier clear
 								Q_Multiplier = 0;
-							} else if ((chord & 0x3) == 0x1) { // Q_Multiplier
+							} else if ((chord & 0x3) == 0x0) { // Q_Multiplier
 								Q_Multiplier = (chord1 & 0xF);
 							} else if (keyCode) {
-								if (chord == 0xFD) { // Pause/Break
+								if (chord == 0xF9) { // Pause/Break
 									keyCode = HID_KEYBOARD_SC_PAUSE;
-								} else if (chord == 0xFE) { // Print Screen
+								} else if (chord == 0xFD) { // Print Screen
 									keyCode = HID_KEYBOARD_SC_PRINT_SCREEN;
-								} else if ((chord & 0x3) == 0x2) { // Mod(Alt)+Func
+								} else if ((chord & 0x3) == 0x1) { // Mod(Alt)+Func
 									mods |= Q_Mods ? Q_Mods : HID_KEYBOARD_MODIFIER_LEFTALT;
 									Q_Mods = 0;
 								}
@@ -806,12 +813,12 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 									Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_TAB;
 									Macros_Buffer[Macros_Index++] = mods;
 									Q_Mods = mods;
-								} else if (chord == 0xE) { // Ctrl+PgUp
+								} else if (chord == 0xD) { // Ctrl+PgUp
 									mods = HID_KEYBOARD_MODIFIER_LEFTCTRL;
 									Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_PAGE_UP;
 									Macros_Buffer[Macros_Index++] = mods;
 									Q_Mods = 0;
-								} else if (chord == 0xD) { // Ctrl+PgDn
+								} else if (chord == 0xE) { // Ctrl+PgDn
 									mods = HID_KEYBOARD_MODIFIER_LEFTCTRL;
 									Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_PAGE_DOWN;
 									Macros_Buffer[Macros_Index++] = mods;
@@ -853,10 +860,11 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 									Q_Mods = 0;
 								}
 							} else {
-								if (keyCode >= HID_KEYBOARD_SC_LEFT_CONTROL && keyCode <= HID_KEYBOARD_SC_RIGHT_GUI) {
+								if (keyCode >= HID_KEYBOARD_SC_LEFT_CONTROL && keyCode <= HID_KEYBOARD_SC_RIGHT_GUI) { // Modificators
 									mods ^= 1 << (keyCode - HID_KEYBOARD_SC_LEFT_CONTROL);
-									Q_Mods = mods;
+									if (! chord21) Q_Mods = mods;
 								} else {
+									// Side arrows
 									if (side == 0 && keyCode == HID_KEYBOARD_SC_LEFT_ARROW) {
 										keyCode = HID_KEYBOARD_SC_RIGHT_ARROW;
 									} else if (side == 0 && keyCode == HID_KEYBOARD_SC_RIGHT_ARROW) {
@@ -866,6 +874,7 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 									} else if (side == 0 && keyCode == HID_KEYBOARD_SC_END) {
 										keyCode = HID_KEYBOARD_SC_HOME;
 									}
+									// Mouse
 									int16_t mouMove = pgm_read_word(&mouMoves[multiplier]);
 									int16_t mouScroll = pgm_read_word(&mouScrolls[multiplier]);
 									if (Q_Nav == MOU_MODE && keyCode == HID_KEYBOARD_SC_LEFT_ARROW) {
@@ -887,16 +896,17 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 									} else if (Q_Nav == MOU_MODE && keyCode == HID_KEYBOARD_SC_TAB) {
 										Mouse_Button = Mouse_Button & 0x4 ? 0 : 0x4;
 									} else {
+										if (keyCode == HID_KEYBOARD_SC_DELETE || keyCode == HID_KEYBOARD_SC_BACKSPACE || keyCode == HID_KEYBOARD_SC_ENTER || keyCode == HID_KEYBOARD_SC_KEYPAD_ENTER || keyCode == HID_KEYBOARD_SC_TAB) {
+											//Q_Mods &= ~(HID_KEYBOARD_MODIFIER_LEFTSHIFT | HID_KEYBOARD_MODIFIER_RIGHTSHIFT);
+											Q_Mods = 0;
+										}
 										Macros_Buffer[Macros_Index++] = keyCode;
 										Macros_Buffer[Macros_Index++] = mods;
-										if (keyCode == HID_KEYBOARD_SC_DELETE || keyCode == HID_KEYBOARD_SC_BACKSPACE) {
-											Q_Mods &= ~(HID_KEYBOARD_MODIFIER_LEFTSHIFT | HID_KEYBOARD_MODIFIER_RIGHTSHIFT);
-										}
 									}
 								}
 							}
 						}
-						if (Macros_Index == 2 && multiplier) {
+						if (Macros_Index == 2 && multiplier && Macros_Buffer[0]) {
 							if (! (Macros_Buffer[1] == HID_KEYBOARD_MODIFIER_LEFTCTRL && (Macros_Buffer[0] == HID_KEYBOARD_SC_LEFT_ARROW || Macros_Buffer[0] == HID_KEYBOARD_SC_RIGHT_ARROW))) {
 								Macros_Buffer[1] &= ~Meta;
 							}
@@ -923,10 +933,10 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 						uint16_t isConsonants = chord2 & 0x07C;
 						uint16_t isVowels = chord2 & 0x303;
 						uint16_t isCShift = chord2 & 0x080;
-						if (chord2 == 0xD4) { // Tab
-							Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_TAB;
-							Macros_Buffer[Macros_Index++] = mods;
-						} else if (chord2 == 0x180) { // Shift+Space
+						if (chord2 == 0x80) { // Space
+							Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_SPACE;
+							Macros_Buffer[Macros_Index++] = 0;
+						} else if (chord2 == 0xD4) { // Shift+Space
 							Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_SPACE;
 							Macros_Buffer[Macros_Index++] = HID_KEYBOARD_MODIFIER_LEFTSHIFT;
 						} else { // Letters
@@ -1090,6 +1100,9 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 									Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_SPACE;
 									Macros_Buffer[Macros_Index++] = 0;
 								}
+							} else if (modsV) { // Tab
+								Macros_Buffer[Macros_Index++] = HID_KEYBOARD_SC_TAB;
+								Macros_Buffer[Macros_Index++] = mods;
 							}
 						}
 					}
@@ -1136,14 +1149,27 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 	} else {
 		USB_MouseReport_Data_t* MouseReport = (USB_MouseReport_Data_t*)ReportData;
 
-		MouseReport->X = Mouse_X;
-		MouseReport->Y = Mouse_Y;
-		MouseReport->W = Mouse_W;
-		Mouse_X = 0;
-		Mouse_Y = 0;
-		Mouse_W = 0;
+		int8_t mouseX = Mouse_X > 100 ? 100 : (Mouse_X < -100 ? -100 : Mouse_X);
+		if (Mouse_X > 100) Mouse_X -= 100;
+		else if (Mouse_X < -100) Mouse_X += 100;
+		else Mouse_X = 0;
+
+		int8_t mouseY = Mouse_Y > 100 ? 100 : (Mouse_Y < -100 ? -100 : Mouse_Y);
+		if (Mouse_Y > 100) Mouse_Y -= 100;
+		else if (Mouse_Y < -100) Mouse_Y += 100;
+		else Mouse_Y = 0;
+
+		int8_t mouseW = Mouse_W > 100 ? 100 : (Mouse_W < -100 ? -100 : Mouse_W);
+		if (Mouse_W > 100) Mouse_W -= 100;
+		else if (Mouse_W < -100) Mouse_W += 100;
+		else Mouse_W = 0;
+
+		MouseReport->X = mouseX;
+		MouseReport->Y = mouseY;
+		MouseReport->W = mouseW;
+
 		MouseReport->Button = Mouse_Button | Mouse_Button_Click;
-		Mouse_Button_Click = 0;
+		if (! Mouse_X && ! Mouse_Y && ! Mouse_W) Mouse_Button_Click = 0;
 
 		*ReportSize = sizeof(USB_MouseReport_Data_t);
 		return true;

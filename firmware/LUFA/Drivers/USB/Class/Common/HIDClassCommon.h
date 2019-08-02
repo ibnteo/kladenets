@@ -491,7 +491,7 @@
 						HID_RI_COLLECTION(8, 0x02),                     \
 						HID_RI_USAGE(8, 0x38),                  \
 						HID_RI_LOGICAL_MINIMUM(16, MinAxisVal), \
-						HID_RI_LOGICAL_MAXIMUM(16, MaxAxisVal), \
+						HID_RI_LOGICAL_MAXIMUM(16, MinAxisVal), \
 						HID_RI_PHYSICAL_MINIMUM(16, MinPhysicalVal), \
 						HID_RI_PHYSICAL_MAXIMUM(16, MaxPhysicalVal), \
 						HID_RI_REPORT_SIZE(8, ((((MinAxisVal >= -128) && (MaxAxisVal <= 127)) ? 8 : 16))), \
@@ -637,9 +637,9 @@
 		typedef struct
 		{
 			uint8_t Button; /**< Button mask for currently pressed buttons in the mouse. */
-			int16_t  X; /**< Current delta X movement of the mouse. */
-			int16_t  Y; /**< Current delta Y movement on the mouse. */
-			int16_t  W; /**< Current delta Wheel movement on the mouse. */
+			int8_t  X; /**< Current delta X movement of the mouse. */
+			int8_t  Y; /**< Current delta Y movement on the mouse. */
+			int8_t  W; /**< Current delta Wheel movement on the mouse. */
 		} ATTR_PACKED USB_MouseReport_Data_t;
 
 		/** \brief Standard HID Boot Protocol Keyboard Report.
