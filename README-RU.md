@@ -186,4 +186,4 @@ Pause/Break = Alt+CapsLock `90-34567`
 
 ---
 
-[Eng](https://ibnteo.github.io/kladenets/README) | **Rus**
+[Eng](https://ibnteo.github.io/kladenets/) | **Rus**
