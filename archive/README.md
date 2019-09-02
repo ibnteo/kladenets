@@ -141,8 +141,8 @@ If printing with one hand on two chords is not convenient, you can consider the 
 
 ## License
 
-[License MIT](../LICENSE.txt)
+[License Apache 2.0](../LICENSE.txt)
 
 ---
 
-**Eng** | [Rus](https://ibnteo.github.io/kladenets/ru/)
+**Eng** | [Rus](https://ibnteo.github.io/kladenets/archive/README-RU)

@@ -51,8 +51,8 @@ This concept was preceded by Kladenets-23, but there were shortcomings in the fo
 
 ## License
 
-[License MIT](LICENSE.txt)
+[License Apache 2.0](LICENSE.txt)
 
 ---
 
-**Eng** | [Rus](https://ibnteo.github.io/kladenets/ru/)
+**Eng** | [Rus](https://ibnteo.github.io/kladenets/README-RU)

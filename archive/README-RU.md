@@ -2,7 +2,7 @@
 
 Кладенец-2 это аккордовая клавиатура для печати до 4 букв за один аккорд двумя руками. Теоретически позволит ускорить печать в 2 раза, по сравнению со стандартными клавиатурами.
 
-![](../../photo/kl2-r.jpg)
+![](../photo/kl2-r.jpg)
 
 Позволяет полноценно работать одной рукой, хоть левой, хоть правой. Может управлять курсором мыши как текстовым курсором, а так же использовать как вертикальную, так и горизонтальную прокрутку.
 
@@ -30,7 +30,7 @@
 
 Для удобства, созданы графы для левой и правой рук, для верхнего и нижнего ряда.
 
-![](../layout/graph.png)
+![](layout/graph.png)
 
 В каждой вершине графа указаны символы, которые будут набираться без большого пальца, и с нажатой кнопкой на большом пальце.
 
@@ -38,7 +38,7 @@
 
 ## Аккорды
 
-![](../layout/chords.png)
+![](layout/chords.png)
 
 Буквы
 ~~~
@@ -97,20 +97,20 @@
 
 ## Схема
 
-![](../../schema/schema.png)
+![](../schema/schema.png)
 
 ## Корпус из деревянной рейки 5x10 мм
 
-![](../../spline/spline.png)
+![](../spline/spline.png)
 
-[SVG](../../spline/spline.svg)
+[SVG](../spline/spline.svg)
 
 ## Корпус из алюминиевой пластины 1,5 мм
 
-![](../../aluminium/kladenets.png)
+![](../aluminium/kladenets.png)
 
-[SVG1](../../aluminium/kladenets1.svg)
-[SVG2](../../aluminium/kladenets1.svg)
+[SVG1](../aluminium/kladenets1.svg)
+[SVG2](../aluminium/kladenets1.svg)
 
 ## Кладенец-3
 
@@ -141,8 +141,8 @@
 
 ## Лицензия
 
-[Лицензия MIT](../../ru/LICENSE.txt)
+[Лицензия Apache 2.0](../LICENSE.txt)
 
 ---
 
-[Eng](https://ibnteo.github.io/kladenets/) | **Rus**
+[Eng](https://ibnteo.github.io/kladenets/archive/README) | **Rus**

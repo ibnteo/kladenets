@@ -35,6 +35,8 @@
  *  the device's capabilities and functions.
  */
 
+uint8_t Mouse_Absolute = 0;
+
 #include "Descriptors.h"
 
 /** HID class report descriptor. This is a special descriptor constructed with values from the
