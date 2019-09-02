@@ -1,7 +1,7 @@
 /*
 * Project: Chord keyboard Kladenets-23
-* Version: 1.2
-* Date: 2019-08-02
+* Version: 1.3
+* Date: 2019-09-02
 * Author: Vladimir Romanovich <ibnteo@gmail.com>
 * License: MIT
 * https://github.com/ibnteo/kladenets
@@ -29,14 +29,6 @@ void Settings_Read(void);
 void Settings_Write(void);
 void Layout_Switch(void);
 void Hardware_Setup(void);
-
-uint16_t Chords[2] = {0, 0};
-// Ports_Init(), LEDs(), Keyboard_Scan()
-#include "microsin162.h"
-//#include "catboard2.h"
-//#include "promicro.h"
-//#include "wakizashi.h"
-//#include "accordionum.h"
 
 #define LAYER1 0
 #define LAYER2 1
@@ -81,6 +73,20 @@ uint8_t EE_Layout_Mode EEMEM;
 uint8_t OS_Mode = OS_LINUX;
 uint8_t EE_OS_Mode EEMEM;
 
+#define KEYS_20	0
+#define KEYS_10	1
+
+uint8_t Keys_Mode = KEYS_20;
+uint8_t EE_Keys_Mode EEMEM;
+
+uint16_t Chords[2] = {0, 0};
+// Ports_Init(), LEDs(), Keyboard_Scan()
+#include "microsin162.h"
+//#include "catboard2.h"
+//#include "promicro.h"
+//#include "wakizashi.h"
+//#include "accordionum.h"
+
 uint8_t Meta = HID_KEYBOARD_MODIFIER_LEFTCTRL;
 
 uint8_t Settings_Side = 0;
@@ -88,11 +94,13 @@ uint8_t Settings_Side = 0;
 void Settings_Read() {
 	Layout_Mode = eeprom_read_byte(&EE_Layout_Mode);
 	OS_Mode = eeprom_read_byte(&EE_OS_Mode);
+	Keys_Mode = eeprom_read_byte(&EE_Keys_Mode);
 	Meta = (OS_Mode == OS_MAC) ? HID_KEYBOARD_MODIFIER_LEFTGUI : HID_KEYBOARD_MODIFIER_LEFTCTRL;
 }
 void Settings_Write() {
 	eeprom_write_byte(&EE_Layout_Mode, Layout_Mode);
 	eeprom_write_byte(&EE_OS_Mode, OS_Mode);
+	eeprom_write_byte(&EE_Keys_Mode, Keys_Mode);
 }
 
 void Layout_Switch() {
@@ -607,13 +615,16 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 					if (Settings_Side && (Settings_Side - 1) == side) { // Settings
 						Settings_Side = 0;
 						uint8_t chord = chord2; // ! uint16_t => uint8_t !
-						if (! (chord2 & ~0x13F)) {
+						if (! (chord2 & ~0x1FF)) {
 							if (chord & 0x3) {
 								Layout_Mode = (chord & 0x3) - 1;
 							}
 							if (chord & 0x3C) {
 								OS_Mode = ((chord & 0x3C) >> 2) - 1;
 								Meta = (OS_Mode == OS_MAC) ? HID_KEYBOARD_MODIFIER_LEFTGUI : HID_KEYBOARD_MODIFIER_LEFTCTRL;
+							}
+							if (chord & 0xC0) {
+								Keys_Mode = ((chord & 0xC0) >> 6) - 1;
 							}
 							if ((chord2 & 0x100) && (chord2 & 0x37)) {
 								Settings_Write();
