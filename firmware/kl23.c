@@ -73,19 +73,23 @@ uint8_t EE_Layout_Mode EEMEM;
 uint8_t OS_Mode = OS_LINUX;
 uint8_t EE_OS_Mode EEMEM;
 
+#define NOT_PRIKLAD false
+
+#if NOT_PRIKLAD
 #define KEYS_20	0
 #define KEYS_10	1
-
 uint8_t Keys_Mode = KEYS_20;
 uint8_t EE_Keys_Mode EEMEM;
+#endif
 
 uint16_t Chords[2] = {0, 0};
 // Ports_Init(), LEDs(), Keyboard_Scan()
-#include "microsin162.h"
+//#include "microsin162.h"
 //#include "catboard2.h"
 //#include "promicro.h"
 //#include "wakizashi.h"
 //#include "accordionum.h"
+#include "priklad2.h"
 
 uint8_t Meta = HID_KEYBOARD_MODIFIER_LEFTCTRL;
 
@@ -94,13 +98,17 @@ uint8_t Settings_Side = 0;
 void Settings_Read() {
 	Layout_Mode = eeprom_read_byte(&EE_Layout_Mode);
 	OS_Mode = eeprom_read_byte(&EE_OS_Mode);
+	#if NOT_PRIKLAD
 	Keys_Mode = eeprom_read_byte(&EE_Keys_Mode);
+	#endif
 	Meta = (OS_Mode == OS_MAC) ? HID_KEYBOARD_MODIFIER_LEFTGUI : HID_KEYBOARD_MODIFIER_LEFTCTRL;
 }
 void Settings_Write() {
 	eeprom_write_byte(&EE_Layout_Mode, Layout_Mode);
 	eeprom_write_byte(&EE_OS_Mode, OS_Mode);
+	#if NOT_PRIKLAD
 	eeprom_write_byte(&EE_Keys_Mode, Keys_Mode);
+	#endif
 }
 
 void Layout_Switch() {
@@ -563,22 +571,39 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 {
 	if (Macros_Index < (MACROS_BUFFER_SIZE - MACROS_BUFFER_MAX)) {
 
+		uint16_t c0[2] = {Chords[0], Chords[1]};
 
-		uint16_t chords[2] = {Chords[0], Chords[1]};
+		#if NOT_PRIKLAD
+		if (Keys_Mode == KEYS_10) { // Desktop PriKlad
+			c0[1] = ((c0[0] & 0xAA) >> 1) | (c0[0] & 0x255) | ((c0[0] & 0x100) << 1) |
+				((c0[1] & 0x200) >> 1) | (c0[1] & 0x1AA) | ((c0[1] & 0x55) << 1);
+			c0[0] = 0;
+		}
+		#endif
+
 		Keyboard_Scan();
+		uint16_t c1[2] = {Chords[0], Chords[1]};
 
-		if ((Chords[0] & 0x300) != 0x200 && (Chords[1] & 0x300) != 0x200) {
+		#if NOT_PRIKLAD
+		if (Keys_Mode == KEYS_10) { // Desktop PriKlad
+			c1[1] = ((c1[0] & 0xAA) >> 1) | (c1[0] & 0x255) | ((c1[0] & 0x100) << 1) |
+				((c1[1] & 0x200) >> 1) | (c1[1] & 0x1AA) | ((c1[1] & 0x55) << 1);
+			c1[0] = 0;
+		}
+		#endif
+
+		if ((c1[0] & 0x300) != 0x200 && (c1[1] & 0x300) != 0x200) {
 			Q_Mods = 0;
 			Q_Multiplier = 0;
 			Q_Nav = NAV_MODE;
 			Mouse_Button = 0;
 		}
-		bool isRelease = Chords[0] < chords[0] || Chords[1] < chords[1];
-		bool isPress = Chords[0] > chords[0] || Chords[1] > chords[1];
+		bool isRelease = c1[0] < c0[0] || c1[1] < c0[1];
+		bool isPress = c1[0] > c0[0] || c1[1] > c0[1];
 		for (uint8_t side=0; side<=1; side++) {
 			uint8_t mods = Q_Mods;
-			uint16_t chord2 = chords[side];
-			uint16_t chord21 = chords[side ? 0 : 1];
+			uint16_t chord2 = c0[side];
+			uint16_t chord21 = c0[side ? 0 : 1];
 			if ((chord21 & 0x300) == 0x200 && (chord21 & 0x3F) && ! (chord21 &0xC0)) { // Modificators
 				uint8_t chord = chord21;
 				uint8_t keyCode = pgm_read_byte(&Layer_NavMou[(chord & 0x3F) - 1]);
@@ -623,15 +648,17 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 								OS_Mode = ((chord & 0x3C) >> 2) - 1;
 								Meta = (OS_Mode == OS_MAC) ? HID_KEYBOARD_MODIFIER_LEFTGUI : HID_KEYBOARD_MODIFIER_LEFTCTRL;
 							}
+							#if NOT_PRIKLAD
 							if (chord & 0xC0) {
 								Keys_Mode = ((chord & 0xC0) >> 6) - 1;
 							}
+							#endif
 							if ((chord2 & 0x100) && (chord2 & 0x37)) {
 								Settings_Write();
 							}
 						}
 						LED_Toggle();
-					} else if ((Chords_Last[side] == 0x299 && chords[side] == 0x266) || (Chords_Last[side] == 0x266 && chords[side] == 0x299)) { // Settings Mode
+					} else if ((Chords_Last[side] == 0x299 && c0[side] == 0x266) || (Chords_Last[side] == 0x266 && c0[side] == 0x299)) { // Settings Mode
 						Settings_Side = side + 1;
 						LED_Toggle();
 					} else if ((chord2 & ~0xC0) == 0x203 && ! (chord21 & 0x203) && (chord21 & 0xFC)) { // Additional Num
@@ -640,7 +667,7 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 					} else if ((chord2 == 0x180) && ! chord21) { // Layer change
 						if (Layout_Mode == LAYOUTS_TWO) {
 							layer = LAYER1;
-							if (Chords[side] == 0x100) {
+							if (c1[side] == 0x100) {
 								layer = LAYER2;
 							}
 							if (Layer_Current != layer) {
@@ -1118,8 +1145,8 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 						}
 					}
 					if (side && isRelease) {
-						Chords_Last[0] = chords[0];
-						Chords_Last[1] = chords[1];
+						Chords_Last[0] = c0[0];
+						Chords_Last[1] = c0[1];
 					}
 					if (side) Chord_Growing = false;
 

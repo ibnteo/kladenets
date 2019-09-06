@@ -100,11 +100,6 @@ void Keyboard_Scan() {
 		if (! (PINC & 1<<4)) Chords_Scan[1] |= 1<<6;
 		if (! (PINB & 1<<4)) Chords_Scan[1] |= 1<<7;
 		PORTB |= 1<<3;
-		if (Keys_Mode == KEYS_10) { // PriKlad
-			Chords_Scan[1] = ((Chords_Scan[0] & 0xAA) >> 1) | (Chords_Scan[0] & 0x255) | ((Chords_Scan[0] & 0x100) << 1) |
-				((Chords_Scan[1] & 0x200) >> 1) | (Chords_Scan[1] & 0x1AA) | ((Chords_Scan[1] & 0x55) << 1);
-			Chords_Scan[0] = 0;
-		}
 		Chords[0] = Chords_Scan[0];
 		Chords[1] = Chords_Scan[1];
 	}
