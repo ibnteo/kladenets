@@ -1,5 +1,5 @@
 /*
-PriKlad on microswitches
+PriKlad
 */
 
 void Ports_Init() {

@@ -73,7 +73,7 @@ uint8_t EE_Layout_Mode EEMEM;
 uint8_t OS_Mode = OS_LINUX;
 uint8_t EE_OS_Mode EEMEM;
 
-#define NOT_PRIKLAD false
+#define NOT_PRIKLAD true
 
 #if NOT_PRIKLAD
 #define KEYS_20	0
@@ -89,7 +89,10 @@ uint16_t Chords[2] = {0, 0};
 //#include "promicro.h"
 //#include "wakizashi.h"
 //#include "accordionum.h"
-#include "priklad2.h"
+//#include "priklad2.h"
+//#include "priklad.h"
+//#include "12nets.h"
+#include "sysadminets.h"
 
 uint8_t Meta = HID_KEYBOARD_MODIFIER_LEFTCTRL;
 
@@ -653,7 +656,7 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 								Keys_Mode = ((chord & 0xC0) >> 6) - 1;
 							}
 							#endif
-							if ((chord2 & 0x100) && (chord2 & 0x37)) {
+							if (chord2 & 0x100) {
 								Settings_Write();
 							}
 						}
@@ -664,10 +667,11 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 					} else if ((chord2 & ~0xC0) == 0x203 && ! (chord21 & 0x203) && (chord21 & 0xFC)) { // Additional Num
 					} else if ((chord2 & ~0x1) == 0x2C2 && ! (chord21 & 0x2C0) && (chord21 & 0x3F)) { // Additional Func
 					} else if (side == 0 && (chord2 == 0xCC || chord2 == 0xF0 || chord2 == 0xFC) && (chord21 & 0x303) && ! (chord21 & ~0x303) && (chord21 & ~0x300) != 0x200) { // Additional Sym
-					} else if ((chord2 == 0x180) && ! chord21) { // Layer change
+					} else if ((chord2 == 0x180 || chord2 == 0x154) && ! chord21) { // Layer change
 						if (Layout_Mode == LAYOUTS_TWO) {
 							layer = LAYER1;
-							if (c1[side] == 0x100) {
+							//if (c1[side] == 0x100) {
+							if (chord2 == 0x154) {
 								layer = LAYER2;
 							}
 							if (Layer_Current != layer) {

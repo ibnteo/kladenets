@@ -24,10 +24,6 @@ In the Quasi layer are also placed all the letters, the chords of the letters ar
 
 [SVG](layout/layout.svg)
 
-## Chords
-
-...
-
 ## Schema
 
 ![](schema/schema.png)
@@ -38,12 +34,13 @@ In the Quasi layer are also placed all the letters, the chords of the letters ar
 
 [SVG](spline/spline.svg)
 
-## 1.5 mm aluminum plate body
+## Structor
 
-![](aluminium/kladenets.png)
+![](spline/structor.png)
 
-[SVG1](aluminium/kladenets1.svg)
-[SVG2](aluminium/kladenets2.svg)
+![](spline/structor.jpg)
+
+[SCAD](spline/kladenets-structor.scad)
 
 ## Concept keyboards Kladenets-2 (3,1,M)
 
