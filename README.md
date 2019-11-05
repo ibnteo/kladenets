@@ -20,7 +20,7 @@ In the Quasi layer are also placed all the letters, the chords of the letters ar
 
 ## Keyboard layout
 
-![](layout/layout.png)
+![](layout/layout9.png)
 
 [SVG](layout/layout.svg)
 
